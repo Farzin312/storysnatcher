@@ -38,6 +38,7 @@ import {DropdownMenu,
         SidebarSeparator,
         SidebarTrigger,
         useSidebar,} from "./Sidebar"
+import Spinner from "./Spinner"
 
 export { Button, DropdownMenu,
     DropdownMenuTrigger,
@@ -77,4 +78,5 @@ export { Button, DropdownMenu,
     SidebarRail,
     SidebarSeparator,
     SidebarTrigger,
-    useSidebar, }
+    useSidebar,
+    Spinner }

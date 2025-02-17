@@ -1,0 +1,31 @@
+[
+    {
+      "id": "1",
+      "title": "Transcribe",
+      "description": "Accurately convert speech to text with downloadable transcripts for any video or audio file.",
+      "image": "/featured/transcribe.png",
+      "url": "/services/transcribe"
+    },
+    {
+      "id": "2",
+      "title": "Summarize",
+      "description": "Generate concise summaries of long videos in seconds to save time and boost productivity.",
+      "image": "/featured/summarize.png",
+      "url": "/services/summarize"
+    },
+    {
+      "id": "3",
+      "title": "Audio",
+      "description": "Create high-quality AI-powered voiceovers for your videos with natural-sounding speech.",
+      "image": "/featured/audio.png",
+      "url": "/services/audio"
+    },
+    {
+      "id": "4",
+      "title": "Video",
+      "description": "Generate engaging videos with AI-driven content creation tools tailored to your needs.",
+      "image": "/featured/video.png",
+      "url": "/services/video"
+    }
+  ]
+  

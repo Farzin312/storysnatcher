@@ -1,0 +1,33 @@
+[
+    {
+      "id": 1,
+      "title": "Generate",
+      "description": "Start by clicking the 'Generate' button to begin the process of creating video transcripts, summaries, or AI-generated voiceovers.",
+      "reminder": "No downloads available at this step. This is just the starting point."
+    },
+    {
+      "id": 2,
+      "title": "Transcribe",
+      "description": "Upload a video file or provide a video URL. The system will transcribe the audio into the selected language, if captions are not already present.",
+      "reminder": "Downloads are available depending on your free tier status."
+    },
+    {
+      "id": 3,
+      "title": "Summarize",
+      "description": "Choose how you'd like the content summarized. You can use a transcript PDF, a previously generated summary, or a video URL. Specify the focus, length, and style of the summary.",
+      "reminder": "Downloads are available if allowed by your free tier status."
+    },
+    {
+      "id": 4,
+      "title": "Audio",
+      "description": "Generate an AI-powered voiceover from your summarized content. Free users have a time limit for audio generation.",
+      "reminder": "Audio downloads depend on your free tier limitations."
+    },
+    {
+      "id": 5,
+      "title": "Video",
+      "description": "Paid users can create a video based on the summarized project. This feature requires an active subscription.",
+      "reminder": "This feature is only available to paid users."
+    }
+  ]
+  
