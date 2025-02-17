@@ -31,7 +31,7 @@ const MobileNavbar = () => {
   return (
     <div className="md:hidden">
       {/* Mobile Navbar Header */}
-      <nav className="flex items-center justify-between px-4 border-b shadow-sm bg-white">
+      <nav className="flex items-center justify-between px-4 border-b shadow-sm">
         <button onClick={() => setIsSidebarOpen(true)} className="focus:outline-none">
           <Menu size={24} />
         </button>
@@ -52,7 +52,7 @@ const MobileNavbar = () => {
 
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-br from-white to-blue-100 shadow-xl rounded-xl transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
