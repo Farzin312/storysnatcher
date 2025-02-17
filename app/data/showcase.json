@@ -1,0 +1,21 @@
+[
+    {
+      "id": 1,
+      "title": "Content Creator",
+      "paragraph": "As a content creator, you can quickly transcribe and summarize your videos for easy reference, or even generate AI voiceovers to repurpose your content across various platforms. This saves you time and effort while keeping your audience engaged.",
+      "image": "/showcase/youtuber.jpg"
+    },
+    {
+      "id": 2,
+      "title": "Student",
+      "paragraph": "Easily transcribe long lectures and summarize key points. Whether studying for exams or completing a research project, you can save hours of manual note-taking—ensuring you never miss crucial details.",
+      "image": "/showcase/student.jpg"
+    },
+    {
+      "id": 3,
+      "title": "Corporate Professional",
+      "paragraph": "For professionals dealing with lengthy meetings, webinars, or training videos, you can quickly capture main insights and share them with your team. Streamline your workflow and keep colleagues in the loop with AI-generated transcripts and summaries.",
+      "image": "/showcase/corporate.jpg"
+    }
+  ]
+  

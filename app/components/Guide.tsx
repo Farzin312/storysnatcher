@@ -9,6 +9,7 @@ import steps from '../data/steps.json';
 const Guide = () => {
   const [activeStep, setActiveStep] = useState<number>(1);
   const [isMobile, setIsMobile] = useState(false);
+  const [showStaticImage, setShowStaticImage] = useState(true);
 
   // Detect if the user is on mobile
   useEffect(() => {
@@ -30,6 +31,13 @@ const Guide = () => {
     if (!isMobile) setActiveStep(stepId);
   };
 
+  // Handle GIF hover
+  const handleGifHover = () => {
+    setShowStaticImage(false);
+    // Reset the GIF after 5 seconds (or the length of your GIF)
+    setTimeout(() => setShowStaticImage(true), 5000);
+  };
+
   return (
     <section className="w-full py-10 px-10">
       {/* Title */}
@@ -39,13 +47,37 @@ const Guide = () => {
       </div>
 
       <div className="flex flex-col md:flex-row items-center gap-6">
-        <div className="w-full justify-center items-center md:w-1/2">
+        {/* GIF container */}
+        <div
+          className="w-full flex justify-center items-center md:w-1/2 relative cursor-pointer"
+          onMouseEnter={handleGifHover}
+        >
+          {showStaticImage ? (
+            <>
+              <Image
+                src="/demo-animation-placeholder.png"
+                alt="Guide Placeholder"
+                width={500}
+                height={500}
+                className="rounded-xl"
+                unoptimized
+              />
+              <div className="absolute top-2/3 left-1/2 transform -translate-x-1/2">
+                <Button variant='outline' className="px-4 py-2 text-sm rounded-lg bg-gray-200">
+                  {isMobile? 'Click to play' : 'Hover to play'}
+                </Button>
+              </div>
+            </>
+          ) : (
             <Image
-              src="/images/demo-animation.gif"
+              src="/demo-animation.gif"
               alt="Guide Demo"
-              width={700}
+              width={500}
               height={500}
+              className="rounded-xl"
+              unoptimized
             />
+          )}
         </div>
 
         <div className="w-full md:w-1/2 flex flex-col">
@@ -53,7 +85,7 @@ const Guide = () => {
             <div
               key={step.id}
               className={`mb-3 rounded-2xl transition-all cursor-pointer ${
-                activeStep === step.id ? 'bg-blue-50 shadow-lg p-4' : ''
+                activeStep === step.id ? 'bg-gradient-to-br from-blue-100 to-white p-4 shadow-sm' : ''
               }`}
               onMouseEnter={() => handleHover(step.id)}
               onClick={() => handleInteraction(step.id)}

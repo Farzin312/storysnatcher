@@ -1,5 +1,5 @@
 import React, {Suspense} from 'react'
-import { Featured, Hero, Guide } from './components'
+import { Featured, Hero, Guide, Showcase } from './components'
 import { Spinner } from './components/reusable'
 
 function page() {
@@ -9,6 +9,7 @@ function page() {
       <Hero />
       <Featured />
       <Guide />
+      <Showcase />
     </div>
     </Suspense>
   )

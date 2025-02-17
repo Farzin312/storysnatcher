@@ -34,11 +34,6 @@ code, pre {
   font-family: var(--font-space-mono), monospace;
 }
 
-video {
-  pointer-events: auto;
-}
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
