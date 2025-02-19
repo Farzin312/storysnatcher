@@ -44,10 +44,8 @@ const Info = () => {
           </p>
         </div>
 
-        {/* Two-Column Layout */}
         <div className="flex flex-col md:flex-row gap-8">
           
-          {/* LEFT COLUMN: WHY US */}
           <div className="flex-1 space-y-4">
             <h3 className="text-xl font-bold text-teal-700">
               Essential AI-Powered Benefits
