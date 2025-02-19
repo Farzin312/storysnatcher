@@ -1,0 +1,41 @@
+[
+    {
+      "id": 1,
+      "name": "Basic",
+      "price": "$0",
+      "description": "Try out our basic features at no cost. Perfect for getting started or creating short, simple summaries.",
+      "perks": [
+        "Registration and login required for all services",
+        "5 free transcriptions per month",
+        "Unlimited summaries (assuming transcript exists)",
+        "5 audio creations & downloads per month",
+        "No video creation"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Gold",
+      "price": "$5.99/mo",
+      "description": "Level up your productivity with more transcriptions, audio creations, and limited video creation.",
+      "perks": [
+        "25 transcriptions per month",
+        "Unlimited summaries (assuming transcript exists)",
+        "25 audio creations per month",
+        "5 video creations with 3 up to retries each"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Diamond",
+      "price": "$12.99/mo",
+      "description": "Go all-in with unlimited features and extended video capabilities for serious content creators.",
+      "perks": [
+        "Unlimited transcriptions",
+        "Unlimited summaries (assuming transcript exists)",
+        "75 audio creation",
+        "20 video creations with 5 up to retries each",
+        "Longer video length supported"
+      ]
+    }
+  ]
+  

@@ -56,7 +56,7 @@ const MobileNavbar = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div className="flex items-center justify-between font-bold px-4 py-3 border-b">
           <span className="text-xl font-bold">Menu</span>
           <button onClick={() => setIsSidebarOpen(false)} className="focus:outline-none">
             <X size={24} />
@@ -68,7 +68,7 @@ const MobileNavbar = () => {
               <Link
                 href="/generate"
                 onClick={() => setIsSidebarOpen(false)}
-                className="block text-lg font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                className="block text-lg font-medium text-gray-700 hover:text-blue-600 font-bold transition-colors"
               >
                 Generate
               </Link>
@@ -76,7 +76,7 @@ const MobileNavbar = () => {
             <li>
               <button
                 onClick={() => setIsServicesExpanded((prev) => !prev)}
-                className="flex w-full items-center justify-between text-lg font-medium text-gray-700 hover:text-blue-600 transition-colors focus:outline-none"
+                className="flex w-full items-center justify-between text-lg font-medium text-gray-700 hover:text-blue-600 font-bold transition-colors focus:outline-none"
               >
                 <span>Services</span>
                 <ChevronDown
@@ -92,7 +92,7 @@ const MobileNavbar = () => {
                     <Link
                       href="/services/summary"
                       onClick={() => setIsSidebarOpen(false)}
-                      className="block text-gray-600 hover:text-blue-500 transition-colors"
+                      className="block text-gray-600 hover:text-blue-500 font-bold transition-colors"
                     >
                       Summary
                     </Link>
@@ -101,7 +101,7 @@ const MobileNavbar = () => {
                     <Link
                       href="/services/transcribe"
                       onClick={() => setIsSidebarOpen(false)}
-                      className="block text-gray-600 hover:text-blue-500 transition-colors"
+                      className="block text-gray-600 hover:text-blue-500 font-bold transition-colors"
                     >
                       Transcribe
                     </Link>
@@ -110,7 +110,7 @@ const MobileNavbar = () => {
                     <Link
                       href="/services/video"
                       onClick={() => setIsSidebarOpen(false)}
-                      className="block text-gray-600 hover:text-blue-500 transition-colors"
+                      className="block text-gray-600 hover:text-blue-500 font-bold transition-colors"
                     >
                       Video
                     </Link>
@@ -119,7 +119,7 @@ const MobileNavbar = () => {
                     <Link
                       href="/services/voice"
                       onClick={() => setIsSidebarOpen(false)}
-                      className="block text-gray-600 hover:text-blue-500 transition-colors"
+                      className="block text-gray-600 hover:text-blue-500 font-bold transition-colors"
                     >
                       Voice
                     </Link>
@@ -131,7 +131,7 @@ const MobileNavbar = () => {
               <Link
                 href="/pricing"
                 onClick={() => setIsSidebarOpen(false)}
-                className="block text-lg font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                className="block text-lg font-medium text-gray-700 hover:text-blue-600 font-bold transition-colors"
               >
                 Pricing
               </Link>
@@ -140,7 +140,7 @@ const MobileNavbar = () => {
               <Link
                 href="/dashboard"
                 onClick={() => setIsSidebarOpen(false)}
-                className="block text-lg font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                className="block text-lg font-medium text-gray-700 hover:text-blue-600 font-bold transition-colors"
               >
                 Dashboard
               </Link>

@@ -43,7 +43,7 @@ const Navbar = () => {
         <Logo />
       <ul className="flex items-center gap-6 text-sm font-medium">
         <li>
-          <Link href="/generate" className="hover:text-blue-600 transition duration-300">
+          <Link href="/generate" className="hover:text-blue-600 font-bold transition duration-300">
             Generate
           </Link>
         </li>
@@ -53,7 +53,7 @@ const Navbar = () => {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <span className="hover:text-blue-600 transition duration-300 flex items-center">
+          <span className="hover:text-blue-600 font-bold transition duration-300 flex items-center">
             Services <ChevronDown size={16} />
           </span>
           {isServicesOpen && (
@@ -64,25 +64,25 @@ const Navbar = () => {
             >
               <Link
                 href="/services/summary"
-                className="block px-4 py-2 hover:bg-blue-200 rounded-md transition duration-300"
+                className="block px-4 py-2 hover:bg-blue-200 font-bold rounded-md transition duration-300"
               >
                 Summary
               </Link>
               <Link
                 href="/services/transcribe"
-                className="block px-4 py-2 hover:bg-blue-200 rounded-md transition duration-300"
+                className="block px-4 py-2 hover:bg-blue-200 font-bold rounded-md transition duration-300"
               >
                 Transcribe
               </Link>
               <Link
                 href="/services/video"
-                className="block px-4 py-2 hover:bg-blue-200 rounded-md transition duration-300"
+                className="block px-4 py-2 hover:bg-blue-200 font-bold rounded-md transition duration-300"
               >
                 Video
               </Link>
               <Link
                 href="/services/voice"
-                className="block px-4 py-2 hover:bg-blue-200 rounded-md transition duration-300"
+                className="block px-4 py-2 hover:bg-blue-200 font-bold rounded-md transition duration-300"
               >
                 Voice
               </Link>
@@ -90,12 +90,12 @@ const Navbar = () => {
           )}
         </li>
         <li>
-          <Link href="/pricing" className="hover:text-blue-600 transition duration-300">
+          <Link href="/pricing" className="hover:text-blue-600 font-bold transition duration-300">
             Pricing
           </Link>
         </li>
         <li>
-          <Link href="/dashboard" className="hover:text-blue-600 transition duration-300">
+          <Link href="/dashboard" className="hover:text-blue-600 font-bold transition duration-300">
             Dashboard
           </Link>
         </li>
