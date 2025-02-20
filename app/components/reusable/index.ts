@@ -39,6 +39,8 @@ import {DropdownMenu,
         SidebarTrigger,
         useSidebar,} from "./Sidebar"
 import Spinner from "./Spinner"
+import StepNavigation from "./StepNavigation"
+import ProgressBar from "./ProgressBar"
 
 export { Button, DropdownMenu,
     DropdownMenuTrigger,
@@ -79,4 +81,6 @@ export { Button, DropdownMenu,
     SidebarSeparator,
     SidebarTrigger,
     useSidebar,
-    Spinner }
+    Spinner,
+    StepNavigation,
+    ProgressBar,}

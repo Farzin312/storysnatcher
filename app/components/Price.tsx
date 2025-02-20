@@ -53,11 +53,11 @@ const Price = () => {
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 px-6 md:px-0">
+        <div className="flex flex-col md:flex-row gap-8 ml-12 md:ml-0">
           {priceData.map((plan) => (
             <div
               key={plan.id}
-              className={`flex-1 rounded-xl shadow-lg p-6 flex flex-col justify-between border-2
+              className={`flex-1 rounded-xl shadow-lg p-6 flex flex-col max-w-[320px] max-h-[675px] md:max-h-none md:max-w-none justify-between border-2
                           hover:scale-105 hover:shadow-xl transition-all duration-500 ${getCardStyle(plan.name)}`}
             >
               {/* Plan Title & Price */}

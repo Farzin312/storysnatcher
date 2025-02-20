@@ -31,12 +31,12 @@ const Info = () => {
   };
 
   return (
-    <section className="w-full bg-gradient-to-b from-blue-50 to-white pb-12 pt-8 px-4 md:px-8">
+    <section className="w-full bg-gradient-to-b from-blue-50 to-white pb-12 pt-8 px-10 md:px-8">
       <div className="max-w-6xl mx-auto">
 
         {/* Main Title */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-extrabold  text-gray-900">
             Essential AI Insights & Frequently Asked Questions
           </h2>
           <p className="text-gray-600 max-w-lg mx-auto text-sm md:text-base mt-2">
@@ -47,7 +47,7 @@ const Info = () => {
         <div className="flex flex-col md:flex-row gap-8">
           
           <div className="flex-1 space-y-4">
-            <h3 className="text-xl font-bold text-teal-700">
+            <h3 className="text-xl font-bold text-center md:text-start text-teal-700">
               Essential AI-Powered Benefits
             </h3>
             {whyUs?.points?.map((point, idx) => (
@@ -64,7 +64,7 @@ const Info = () => {
 
           {/* RIGHT COLUMN: FAQ */}
           <div className="flex-1 space-y-4">
-            <h3 className="text-xl font-bold text-teal-700">
+            <h3 className="text-xl font-bold text-center md:text-start text-teal-700">
               Answers to Your Questions
             </h3>
             {faq?.faqs?.map((item, idx) => {
