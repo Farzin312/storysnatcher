@@ -34,7 +34,7 @@ export default function StepPage() {
   const currentStepIndex = stepKeys.indexOf(stepParam as string);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-white">
+    <div className="min-h-screen w-full flex justify-center items-center">
       <div className="max-w-3xl mx-auto p-6">
         {/* Progress Bar */}
         <ProgressBar />
