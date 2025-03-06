@@ -1,33 +1,26 @@
 [
-    {
-      "id": 1,
-      "title": "Generate",
-      "description": "Start by clicking the 'Generate' button to begin the process of creating video transcripts, summaries, or AI-generated voiceovers.",
-      "reminder": "No downloads available at this step. This is just the starting point."
-    },
-    {
-      "id": 2,
-      "title": "Transcribe",
-      "description": "Upload a video file or provide a video URL. The system will transcribe the audio into the selected language, if captions are not already present.",
-      "reminder": "Downloads are available depending on your free tier status."
-    },
-    {
-      "id": 3,
-      "title": "Summarize",
-      "description": "Choose how you'd like the content summarized. You can use a transcript PDF, a previously generated summary, or a video URL. Specify the focus, length, and style of the summary.",
-      "reminder": "Downloads are available if allowed by your free tier status."
-    },
-    {
-      "id": 4,
-      "title": "Audio",
-      "description": "Generate an AI-powered voiceover from your summarized content. Free users have a time limit for audio generation.",
-      "reminder": "Audio downloads depend on your free tier limitations."
-    },
-    {
-      "id": 5,
-      "title": "Video",
-      "description": "Paid users can create a video based on the summarized project. This feature requires an active subscription.",
-      "reminder": "This feature is only available to paid users."
-    }
-  ]
-  
+  {
+    "id": 1,
+    "title": "Transcribe",
+    "description": "Upload an audio file or enter a YouTube URL. The system will generate an accurate transcription of the spoken content.",
+    "reminder": "Transcripts are stored securely and can be used for summaries and study tools."
+  },
+  {
+    "id": 2,
+    "title": "Summarize",
+    "description": "Generate concise summaries from your transcript. Choose between bullet points, key insights, or detailed explanations.",
+    "reminder": "Summaries help condense large amounts of information for quick review."
+  },
+  {
+    "id": 3,
+    "title": "Flashcards",
+    "description": "Convert key ideas from your transcript into AI-generated flashcards for active recall and spaced repetition.",
+    "reminder": "You can review flashcards anytime to reinforce learning."
+  },
+  {
+    "id": 4,
+    "title": "Quizzes",
+    "description": "Test your knowledge with AI-generated quizzes based on the transcription content. Includes multiple-choice and written-response questions.",
+    "reminder": "Quizzes help you assess comprehension and retention of key information."
+  }
+]

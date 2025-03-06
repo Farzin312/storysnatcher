@@ -1,41 +1,41 @@
 [
-    {
-      "id": 1,
-      "name": "Basic",
-      "price": "$0",
-      "description": "Try out our basic features at no cost. Perfect for getting started or creating short, simple summaries.",
-      "perks": [
-        "Registration and login required for all services",
-        "5 free transcriptions per month",
-        "Unlimited summaries (assuming transcript exists)",
-        "5 audio creations & downloads per month",
-        "No video creation"
-      ]
-    },
-    {
-      "id": 2,
-      "name": "Gold",
-      "price": "$5.99/mo",
-      "description": "Level up your productivity with more transcriptions, audio creations, and limited video creation.",
-      "perks": [
-        "25 transcriptions per month",
-        "Unlimited summaries (assuming transcript exists)",
-        "25 audio creations per month",
-        "5 video creations with 3 up to retries each"
-      ]
-    },
-    {
-      "id": 3,
-      "name": "Diamond",
-      "price": "$12.99/mo",
-      "description": "Go all-in with unlimited features and extended video capabilities for serious content creators.",
-      "perks": [
-        "Unlimited transcriptions",
-        "Unlimited summaries (assuming transcript exists)",
-        "75 audio creation",
-        "20 video creations with 5 up to retries each",
-        "Longer video length supported"
-      ]
-    }
-  ]
-  
+  {
+    "id": 1,
+    "name": "Basic",
+    "price": "$0/mo",
+    "description": "Start learning with AI-powered transcription, summaries, and study tools for free.",
+    "perks": [
+      "⏳ 25 minutes of transcription per month",
+      "⏳ 20 YouTube transcript downloads",
+      "⏳ Generate up to 100 flashcards",
+      "⏳ Save up to 5 batches",
+      "⏳ 3 personalized quizzes with feedback"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Gold",
+    "price": "$4.99/mo",
+    "description": "Boost your learning with more transcription time, flashcards, and quizzes.",
+    "perks": [
+      "💡 150 minutes of transcription per month",
+      "💡 75 YouTube transcript downloads",
+      "💡 Generate up to 1,000 flashcards",
+      "💡 Save up to 25 batches",
+      "💡 10 personalized quizzes with feedback"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Diamond",
+    "price": "$9.99/mo",
+    "description": "Unlock the highest limits and advanced AI learning tools.",
+    "perks": [
+      "🔥 400 minutes of transcription per month",
+      "🔥 250 YouTube transcript downloads",
+      "🔥 Generate up to 5,000 flashcards",
+      "🔥 Save up to 50 batches",
+      "🔥 25 personalized quizzes with difficulty adjustments"
+    ]
+  }
+]

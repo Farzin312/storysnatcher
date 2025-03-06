@@ -63,7 +63,8 @@ const Guide = () => {
                 unoptimized
               />
               <div className="absolute top-2/3 left-1/2 transform -translate-x-1/2">
-                <Button variant='outline' className="px-4 py-2 text-sm rounded-lg bg-gray-200">
+                <Button variant='outline'
+                 className="px-4 py-2 text-sm rounded-lg bg-gray-200">
                   {isMobile? 'Click to play' : 'Hover to play'}
                 </Button>
               </div>
@@ -109,8 +110,8 @@ const Guide = () => {
 
               {step.id === 1 && activeStep === 1 && (
                 <div className="mt-4">
-                  <Button variant="default">
-                    <Link href="/generate">Generate</Link>
+                  <Button variant="default">                
+                    <Link href="/generate">Get Started</Link>
                   </Button>
                 </div>
               )}

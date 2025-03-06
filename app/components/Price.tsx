@@ -5,16 +5,6 @@ import priceData from '@/app/data/price.json';
 import { Button } from './reusable';
 
 const Price = () => {
-  const getIcon = (text: string) => {
-    if (text.toLowerCase().includes('no')) {
-      return <span className="mr-2 text-red-500">✗</span>;
-    }
-    if (text.toLowerCase().includes('limited') || text.match(/\b\d+\b/)) {
-      return <span className="mr-2 text-orange-500">🔶</span>;
-    }
-    return <span className="mr-2 text-green-600">✓</span>;
-  };
-
   const getCardStyle = (planName: string) => {
     switch (planName) {
       case 'Free':
@@ -81,7 +71,6 @@ const Price = () => {
               <ul className="mt-4 space-y-3 text-gray-900">
                 {plan.perks.map((perk, idx) => (
                   <li key={idx} className="flex items-start">
-                    {getIcon(perk)}
                     <span>{perk}</span>
                   </li>
                 ))}

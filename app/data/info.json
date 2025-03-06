@@ -2,11 +2,11 @@
   {
     "section": "Why Us",
     "points": [
-      "AI-powered content generation for videos, audio, and text.",
-      "Quick and accurate transcription with simple summaries.",
-      "User-friendly design for creators, researchers, and students.",
-      "Flexible pricing with unbeatable value.",
-      "Data privacy and security at every step."
+      "AI-powered transcription, summarization, and study tools.",
+      "Accurate transcriptions for better learning and note-taking.",
+      "Interactive flashcards and quizzes to reinforce knowledge.",
+      "Intuitive platform for students, researchers, and professionals.",
+      "Secure and private—your data is always protected."
     ]
   },
   {
@@ -18,11 +18,11 @@
       },
       {
         "question": "What's included in the free plan?",
-        "answer": "The free plan includes 5 transcriptions, unlimited summaries, and 5 audio creations per month."
+        "answer": "The free plan includes 5 transcriptions per month, unlimited summaries, and 20 flashcards per month."
       },
       {
-        "question": "How long does video creation take?",
-        "answer": "Video generation typically takes a few minutes, depending on the length and complexity."
+        "question": "How are flashcards and quizzes generated?",
+        "answer": "Our AI extracts key concepts from the transcript to create interactive flashcards and quizzes."
       },
       {
         "question": "Is my content secure?",

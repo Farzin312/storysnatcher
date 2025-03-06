@@ -38,9 +38,11 @@ import {DropdownMenu,
         SidebarSeparator,
         SidebarTrigger,
         useSidebar,} from "./Sidebar"
-import Spinner from "./Spinner"
-import StepNavigation from "./StepNavigation"
-import ProgressBar from "./ProgressBar"
+    import Spinner from "./Spinner"
+    import Card from "./Cards"
+    import MultipleChoice from "./MultipleChoice"
+    import WrittenResponse from "./WrittenResponse"
+    import GeneratingOverlay from "./GeneratingOverlay"
 
 export { Button, DropdownMenu,
     DropdownMenuTrigger,
@@ -82,5 +84,4 @@ export { Button, DropdownMenu,
     SidebarTrigger,
     useSidebar,
     Spinner,
-    StepNavigation,
-    ProgressBar,}
+    Card, WrittenResponse, MultipleChoice, GeneratingOverlay }
