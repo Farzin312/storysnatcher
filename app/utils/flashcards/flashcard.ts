@@ -1,4 +1,3 @@
-// File: utils/flashcards/flashcard.ts
 import { OpenAI } from "openai";
 import { CardType } from "@/app/components/reusable/Cards";
 
@@ -22,12 +21,14 @@ export async function generateFlashcards({
   language,
   cardQuantity,
 }: GenerateFlashcardsParams): Promise<CardType[]> {
-  const prompt = `Based on the following transcript in ${language}, generate ${cardQuantity} flashcards. Each flashcard must be represented as a JSON object with "question" and "answer" properties. The response must be a valid JSON array containing exactly ${cardQuantity} objects.
+  // We instruct the model to output flashcards in the selected language,
+  // regardless of the transcript’s original language.
+  const prompt = `Generate ${cardQuantity} flashcards in ${language} based on the following transcript. Even if the transcript is in another language, ensure that both the questions and answers are written exclusively in ${language}. Each flashcard must be represented as a JSON object with "question" and "answer" properties. The response must be a valid JSON array containing exactly ${cardQuantity} objects.
   
-  Transcript: ${transcript}
-  Instructions: ${instructions}
+Transcript: ${transcript}
+Instructions: ${instructions}
 
-  Return ONLY the JSON array without any additional text.`;
+Return ONLY the JSON array without any additional text.`;
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -41,10 +42,10 @@ export async function generateFlashcards({
   const responseText = completion.choices?.[0]?.message?.content || "";
 
   try {
-    // Attempt to parse response directly as JSON
+    // Attempt to parse the response directly as JSON.
     return JSON.parse(responseText) as CardType[];
   } catch {
-    // Use a regex to extract JSON array without the /s flag (dotAll mode)
+    // Fallback: use a regex to extract the JSON array.
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       try {

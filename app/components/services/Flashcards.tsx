@@ -180,7 +180,7 @@ export default function Flashcards() {
         const newCards: CardType[] = data.flashcards.map((card: CardType, index: number) => ({
           ...card,
           id: card.id || `flashcard-${Date.now()}-${index}`,
-          isLocked: card.isLocked ?? false,
+          isLocked: card.isLocked !== undefined ? card.isLocked : false,
         }));
         // Replace only the unlocked flashcards.
         const lockedCards = flashcards.filter((c) => c.isLocked);
