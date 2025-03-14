@@ -47,7 +47,7 @@ const Price = () => {
           {priceData.map((plan) => (
             <div
               key={plan.id}
-              className={`flex-1 rounded-xl shadow-lg p-6 flex flex-col max-w-[320px] max-h-[675px] md:max-h-none md:max-w-none justify-between border-2
+              className={`flex-1 rounded-xl shadow-lg p-6 flex flex-col max-w-[320px] md:min-h-[550px] md:max-h-none md:max-w-none justify-between border-2
                           hover:scale-105 hover:shadow-xl transition-all duration-500 ${getCardStyle(plan.name)}`}
             >
               {/* Plan Title & Price */}
