@@ -1,25 +1,25 @@
 [
   {
     "id": 1,
-    "title": "Transcribe",
+    "title": "Generate Transcription",
     "description": "Upload an audio file or enter a YouTube URL. The system will generate an accurate transcription of the spoken content.",
     "reminder": "Transcripts are stored securely and can be used for summaries and study tools."
   },
   {
     "id": 2,
-    "title": "Summarize",
+    "title": "Generate Summarize",
     "description": "Generate concise summaries from your transcript. Choose between bullet points, key insights, or detailed explanations.",
     "reminder": "Summaries help condense large amounts of information for quick review."
   },
   {
     "id": 3,
-    "title": "Flashcards",
+    "title": "Generate Flashcard",
     "description": "Convert key ideas from your transcript into AI-generated flashcards for active recall and spaced repetition.",
     "reminder": "You can review flashcards anytime to reinforce learning."
   },
   {
     "id": 4,
-    "title": "Quizzes",
+    "title": "Generate Quiz",
     "description": "Test your knowledge with AI-generated quizzes based on the transcription content. Includes multiple-choice and written-response questions.",
     "reminder": "Quizzes help you assess comprehension and retention of key information."
   }

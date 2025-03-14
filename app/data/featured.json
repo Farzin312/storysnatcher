@@ -1,28 +1,28 @@
 [
   {
     "id": "1",
-    "title": "Transcribe",
+    "title": "Transcription",
     "description": "Convert spoken content from saved audio or YouTube videos into accurate, downloadable text.",
     "image": "/featured/transcribe.png",
     "url": "/services/transcribe"
   },
   {
     "id": "2",
-    "title": "Summarize",
+    "title": "Summary",
     "description": "Generate concise and detailed summaries from your transcriptions to enhance learning and retention.",
     "image": "/featured/summarize.png",
     "url": "/services/summarize"
   },
   {
     "id": "3",
-    "title": "Flashcards",
+    "title": "Flashcard",
     "description": "Turn key concepts from transcriptions into interactive flashcards to reinforce knowledge.",
     "image": "/featured/audio.png",
     "url": "/services/flashcards"
   },
   {
     "id": "4",
-    "title": "Quizzes",
+    "title": "Quiz",
     "description": "Test your understanding with multiple-choice and written-response quizzes based on your transcripts.",
     "image": "/featured/video.png",
     "url": "/services/quizzes"

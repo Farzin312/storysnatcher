@@ -43,6 +43,12 @@ import {DropdownMenu,
     import MultipleChoice from "./MultipleChoice"
     import WrittenResponse from "./WrittenResponse"
     import GeneratingOverlay from "./GeneratingOverlay"
+    import Modal from "./Modal"
+    import LoginComponent from "./LoginComponent"
+    import LoginModal from "./LoginModal"
+    import ProgressBar from "./ProgressBar"
+    import TranscriptShowcase from "./TranscriptShowcase"
+    import Option from "./Option"
 
 export { Button, DropdownMenu,
     DropdownMenuTrigger,
@@ -84,4 +90,5 @@ export { Button, DropdownMenu,
     SidebarTrigger,
     useSidebar,
     Spinner,
-    Card, WrittenResponse, MultipleChoice, GeneratingOverlay }
+    Card, WrittenResponse, MultipleChoice, GeneratingOverlay, Modal, LoginComponent, LoginModal, ProgressBar,
+    TranscriptShowcase, Option }

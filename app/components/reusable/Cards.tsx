@@ -37,14 +37,16 @@ const Card: React.FC<CardProps> = ({ card, onToggle }) => {
       >
         {/* Front Side */}
         <div
-          className="absolute w-full h-full bg-white rounded p-3 flex flex-col justify-between"
+          className="absolute w-full h-full bg-white rounded p-3 flex flex-col justify-between pt-10"
           style={{ backfaceVisibility: "hidden" }}
         >
           <p className="text-sm font-semibold text-gray-800">{card.question}</p>
+          
           <div className="text-xs text-gray-600">
-            {card.isLocked ? "Locked" : "Tap to lock"}
-          </div>
+            {card.isLocked ? "Locked" : "Tap for answer"}
+          </div>  
         </div>
+        
         {/* Back Side */}
         <div
           className="absolute w-full h-full bg-white rounded p-3 flex items-center justify-center"

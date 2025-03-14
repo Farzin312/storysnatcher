@@ -43,7 +43,7 @@ const Price = () => {
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 ml-12 md:ml-0">
+        <div className="flex flex-col items-center md:flex-row gap-8 md:ml-0">
           {priceData.map((plan) => (
             <div
               key={plan.id}
