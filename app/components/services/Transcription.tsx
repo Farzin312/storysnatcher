@@ -257,7 +257,7 @@ export default function Transcription() {
   };
 
   return (
-    <div className="bg-blue-50 text-gray-800 min-h-screen p-8">
+    <div className="text-gray-800 min-h-screen p-8">
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Universal Language Selector */}
         <header className="text-center">

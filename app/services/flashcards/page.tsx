@@ -4,7 +4,7 @@ import { Spinner } from '@/app/components/reusable'
 
 function page() {
   return (
-    <main className='min-h-screen bg-blue-50 text-gray-800 p-8'>
+    <main className='min-h-screen text-gray-800 p-8'>
       <Suspense fallback={<Spinner />}>
       <header className='text-center'>
       <h1 className="text-4xl font-bold mb-4">Generate Flashcards</h1>

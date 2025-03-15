@@ -1,28 +1,28 @@
 import { supabase } from "../client"; 
-import { CardType } from "@/app/components/reusable/Cards";
+import { QuizGenerationResult } from "./quiz";
 
-interface FlashcardSetRecord {
+interface QuizSetRecord {
   id: string;
   firebase_uid: string;
-  name: string;
-  flashcards: CardType[];
+  quiz_set_name: string;
+  quizzes: QuizGenerationResult;
   created_at: string;
 }
 
-interface SaveFlashcardSetParams {
+interface SaveQuizSetParams {
   userId: string;
   name: string;
-  flashcards: CardType[];
+  quizzes: QuizGenerationResult;
 }
 
-export async function saveFlashcardSet({ userId, name, flashcards }: SaveFlashcardSetParams): Promise<FlashcardSetRecord[]> {
+export async function saveQuizSet({ userId, name, quizzes }: SaveQuizSetParams): Promise<QuizSetRecord[]> {
   const { data, error } = await supabase
-    .from("flashcard_sets")
+    .from("quiz_sets")
     .insert([
       {
         firebase_uid: userId,
-        name: name,
-        flashcards: flashcards,
+        quiz_set_name: name,
+        quizzes,
       },
     ])
     .select();
@@ -37,14 +37,14 @@ export async function saveFlashcardSet({ userId, name, flashcards }: SaveFlashca
   return data;
 }
 
-export async function getUserFlashcardSets(userId: string): Promise<FlashcardSetRecord[]> {
+export async function getUserQuizSets(userId: string): Promise<QuizSetRecord[]> {
   const { data, error } = await supabase
-    .from("flashcard_sets")
+    .from("quiz_sets")
     .select("*")
     .eq("firebase_uid", userId)
     .order("created_at", { ascending: false });
   if (error) {
-    console.error("Error fetching flashcard sets:", error);
+    console.error("Error fetching quiz sets:", error);
     throw error;
   }
   return data ?? [];

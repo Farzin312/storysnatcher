@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebase";
 import { LoginModal, Modal, Button, ProgressBar, Spinner } from "../reusable/";
-import Card, { CardType } from "../reusable/Cards";
+import MultipleChoice, { QuizMCQuestion } from "../reusable/MultipleChoice";
+import WrittenResponse, { QuizSAQuestion } from "../reusable/WrittenResponse";
 import whisperLanguagesData from "@/app/data/whisperLanguages.json";
 
 interface Transcript {
@@ -18,12 +19,15 @@ interface WhisperLanguage {
 }
 
 const whisperLanguages: WhisperLanguage[] = whisperLanguagesData.languages;
-const INITIAL_CARD_QUANTITY = 25;
+const INITIAL_QUIZ_QUANTITY = 25;
 
-export default function Flashcards() {
-  // Language and method states
+type QuizTypeOption = "mc" | "sa" | "both";
+
+export default function Quizzes() {
+  // Language, source, and quiz type states
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [activeMethod, setActiveMethod] = useState<"saved" | "youtube">("saved");
+  const [quizType, setQuizType] = useState<QuizTypeOption>("mc");
 
   // For saved transcripts
   const [savedTranscripts, setSavedTranscripts] = useState<Transcript[]>([]);
@@ -34,13 +38,14 @@ export default function Flashcards() {
   // For YouTube method
   const [youtubeUrl, setYoutubeUrl] = useState<string>("");
 
-  // Flashcard generation states
-  const [flashcards, setFlashcards] = useState<CardType[]>([]);
-  const [flashcardsLoading, setFlashcardsLoading] = useState<boolean>(false);
-  const defaultInstructions = "Generate flashcards that ask about key points from the transcript.";
+  // Quiz generation states
+  const [mcQuestions, setMcQuestions] = useState<QuizMCQuestion[]>([]);
+  const [saQuestions, setSaQuestions] = useState<QuizSAQuestion[]>([]);
+  const [quizzesLoading, setQuizzesLoading] = useState<boolean>(false);
+  const defaultInstructions = "Generate quiz questions based on key points from the transcript.";
 
-  // New state for naming & saving flashcard set
-  const [flashcardSetName, setFlashcardSetName] = useState<string>("");
+  // New state for naming & saving quiz set
+  const [quizSetName, setQuizSetName] = useState<string>("");
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
   // User auth and error modal
@@ -90,11 +95,11 @@ export default function Flashcards() {
     }
   }
 
-  // Simulate progress updates for flashcard generation and saving.
+  // Simulate progress updates for quiz generation and saving.
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     let timeout: NodeJS.Timeout | null = null;
-    if (flashcardsLoading || saveLoading) {
+    if (quizzesLoading || saveLoading) {
       setShowProgressModal(true);
       setProgress(0);
       interval = setInterval(() => {
@@ -116,10 +121,10 @@ export default function Flashcards() {
       if (interval) clearInterval(interval);
       if (timeout) clearTimeout(timeout);
     };
-  }, [flashcardsLoading, saveLoading, modalMessage]);
+  }, [quizzesLoading, saveLoading, modalMessage]);
 
-  // Generate flashcards by calling our API route.
-  async function handleGenerateFlashcards() {
+  // Generate quizzes by calling our API route.
+  async function handleGenerateQuizzes() {
     if (!user) {
       setShowLoginModal(true);
       return;
@@ -154,91 +159,73 @@ export default function Flashcards() {
         return;
       }
     }
-    const lockedCount = flashcards.filter((c) => c.isLocked).length;
-    const cardQuantity = INITIAL_CARD_QUANTITY - lockedCount;
-    if (cardQuantity <= 0) {
-      setModalMessage("All flashcards are locked. Unlock some to refresh.");
-      return;
-    }
-    setFlashcardsLoading(true);
+    setQuizzesLoading(true);
     try {
-      const res = await fetch("/api/flashcard", {
+      const res = await fetch("/api/quizzes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transcript: transcriptText,
           instructions: defaultInstructions,
           language: selectedLanguage,
-          cardQuantity,
+          quizType,
+          cardQuantity: INITIAL_QUIZ_QUANTITY,
         }),
       });
       const data = await res.json();
       if (data.error) {
-        setModalMessage("Error generating flashcards: " + data.error);
+        setModalMessage("Error generating quizzes: " + data.error);
       } else {
-        // Map the returned flashcards, ensuring each has a unique id and a boolean isLocked.
-        const newCards: CardType[] = data.flashcards.map((card: CardType, index: number) => ({
-          ...card,
-          id: card.id || `flashcard-${Date.now()}-${index}`,
-          isLocked: card.isLocked !== undefined ? card.isLocked : false,
-        }));
-        // Replace only the unlocked flashcards.
-        const lockedCards = flashcards.filter((c) => c.isLocked);
-        setFlashcards([...lockedCards, ...newCards]);
+        if (quizType === "mc") {
+          setMcQuestions(data.multipleChoice);
+          setSaQuestions([]);
+        } else if (quizType === "sa") {
+          setSaQuestions(data.writtenResponse);
+          setMcQuestions([]);
+        } else if (quizType === "both") {
+          setMcQuestions(data.multipleChoice);
+          setSaQuestions(data.writtenResponse);
+        }
       }
     } catch (error) {
-      console.error("Flashcard generation error:", error);
-      setModalMessage("Error generating flashcards. Please try again.");
+      console.error("Quiz generation error:", error);
+      setModalMessage("Error generating quizzes. Please try again.");
     } finally {
-      setFlashcardsLoading(false);
+      setQuizzesLoading(false);
     }
   }
 
-  // Refresh flashcards: re-generate flashcards for the unlocked ones.
-  function handleRefreshFlashcards() {
-    handleGenerateFlashcards();
-  }
-
-  // Toggle lock state on a flashcard (via checkbox)
-  function toggleLock(cardId: string) {
-    setFlashcards((prevCards) =>
-      prevCards.map((card) =>
-        card.id === cardId ? { ...card, isLocked: !card.isLocked } : card
-      )
-    );
-  }
-
-  // Save flashcard set by calling our API route.
-  async function handleSaveFlashcards() {
+  // Save quiz set by calling our API route.
+  async function handleSaveQuizzes() {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
-    if (!flashcardSetName.trim()) {
-      setModalMessage("Please provide a name for your flashcard set.");
+    if (!quizSetName.trim()) {
+      setModalMessage("Please provide a name for your quiz set.");
       return;
     }
     setSaveLoading(true);
     try {
-      const res = await fetch("/api/flashcard/save", {
+      const res = await fetch("/api/quizzes/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.uid,
-          name: flashcardSetName.trim(),
-          flashcards,
+          name: quizSetName.trim(),
+          quizzes: { multipleChoice: mcQuestions, writtenResponse: saQuestions },
         }),
       });
       const data = await res.json();
       if (data.error) {
-        setModalMessage("Error saving flashcards: " + data.error);
+        setModalMessage("Error saving quizzes: " + data.error);
       } else {
-        setModalMessage("Flashcards saved successfully!");
-        setFlashcardSetName("");
+        setModalMessage("Quizzes saved successfully!");
+        setQuizSetName("");
       }
     } catch (error) {
-      console.error("Save flashcards error:", error);
-      setModalMessage("Error saving flashcards. Please try again.");
+      console.error("Save quizzes error:", error);
+      setModalMessage("Error saving quizzes. Please try again.");
     } finally {
       setSaveLoading(false);
     }
@@ -292,6 +279,23 @@ export default function Flashcards() {
           </Button>
         </div>
 
+        {/* Quiz Type Selection */}
+        <div className="flex justify-center items-center space-x-4">
+          <label htmlFor="quiz-type" className="text-gray-700 font-medium">
+            Quiz Type:
+          </label>
+          <select
+            id="quiz-type"
+            value={quizType}
+            onChange={(e) => setQuizType(e.target.value as QuizTypeOption)}
+            className="border p-2 rounded"
+          >
+            <option value="mc">Multiple Choice</option>
+            <option value="sa">Written Response</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+
         {/* Transcript input based on method */}
         {activeMethod === "saved" ? (
           <div className="flex flex-col items-center">
@@ -335,49 +339,46 @@ export default function Flashcards() {
           </div>
         )}
 
-        {/* Generate / Refresh Flashcards */}
+        {/* Generate / Refresh Quizzes */}
         <div className="flex justify-center space-x-4">
-          <Button onClick={handleGenerateFlashcards} disabled={flashcardsLoading}>
-            {flashcardsLoading ? "Generating Flashcards..." : "Generate Flashcards"}
+          <Button onClick={handleGenerateQuizzes} disabled={quizzesLoading}>
+            {quizzesLoading ? "Generating Quizzes..." : "Generate Quizzes"}
           </Button>
-          {flashcards.length > 0 && (
-            <Button onClick={handleRefreshFlashcards} disabled={flashcardsLoading}>
-              Refresh Flashcards
+          {(mcQuestions.length > 0 || saQuestions.length > 0) && (
+            <Button onClick={handleGenerateQuizzes} disabled={quizzesLoading}>
+              Refresh Quizzes
             </Button>
           )}
         </div>
 
-        {/* Display flashcards in a responsive grid */}
-        {flashcards.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {flashcards.map((card) => (
-              <div key={card.id} className="relative">
-                <Card card={card} onToggle={() => {}} />
-                <div className="absolute top-1 right-1">
-                  <input
-                    type="checkbox"
-                    checked={!!card.isLocked}
-                    onChange={() => toggleLock(card.id)}
-                    className="h-4 w-4"
-                  />
-                </div>
-              </div>
-            ))}
+        {/* Display Multiple Choice Quizzes */}
+        {mcQuestions.length > 0 && (
+          <div className="mt-8 overflow-x-auto" style={{ maxWidth: "100%", height: "400px" }}>
+            <h2 className="text-2xl font-bold mb-4">Multiple Choice Questions</h2>
+            <MultipleChoice questions={mcQuestions} language={selectedLanguage} />
           </div>
         )}
 
-        {/* Save flashcard set */}
-        {flashcards.length > 0 && (
+        {/* Display Written Response Quizzes */}
+        {saQuestions.length > 0 && (
+          <div className="mt-8 overflow-x-auto" style={{ maxWidth: "100%"}}>
+            <h2 className="text-2xl font-bold mb-4">Written Response Questions</h2>
+            <WrittenResponse questions={saQuestions} language={selectedLanguage} />
+          </div>
+        )}
+
+        {/* Save quiz set */}
+        {(mcQuestions.length > 0 || saQuestions.length > 0) && (
           <div className="bg-white p-6 rounded shadow-lg mt-4 flex flex-col items-center space-y-2">
             <input
               type="text"
-              value={flashcardSetName}
-              onChange={(e) => setFlashcardSetName(e.target.value)}
-              placeholder="Name your flashcard set"
+              value={quizSetName}
+              onChange={(e) => setQuizSetName(e.target.value)}
+              placeholder="Name your quiz set"
               className="border p-2 rounded w-full max-w-md"
             />
-            <Button onClick={handleSaveFlashcards} disabled={saveLoading}>
-              {saveLoading ? "Saving Flashcards..." : "Save Flashcards"}
+            <Button onClick={handleSaveQuizzes} disabled={saveLoading}>
+              {saveLoading ? "Saving Quizzes..." : "Save Quizzes"}
             </Button>
           </div>
         )}

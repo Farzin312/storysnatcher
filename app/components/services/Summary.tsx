@@ -265,7 +265,7 @@ export default function Summary() {
   }
 
   return (
-    <div className="bg-blue-50 text-gray-800 p-8">
+    <div className="text-gray-800 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Language selector */}
         <div className="flex justify-center items-center space-x-4">
