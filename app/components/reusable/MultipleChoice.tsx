@@ -11,6 +11,7 @@ export interface QuizMCQuestion {
 interface MultipleChoiceProps {
   questions: QuizMCQuestion[];
   language: string;
+  revealAnswers?: boolean;
 }
 
 const translations: Record<string, { noQuestions: string }> = {
@@ -20,12 +21,14 @@ const translations: Record<string, { noQuestions: string }> = {
   de: { noQuestions: "Keine Multiple-Choice-Fragen generiert." },
 };
 
-const MultipleChoice: React.FC<MultipleChoiceProps> = ({ questions, language }) => {
+const MultipleChoice: React.FC<MultipleChoiceProps> = ({ questions, language, revealAnswers = false }) => {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number | null>>({});
   const t = translations[language] || translations["en"];
 
   const handleOptionClick = (questionId: string, optionIdx: number) => {
-    setSelectedOptions((prev) => ({ ...prev, [questionId]: optionIdx }));
+    if (!revealAnswers) {
+      setSelectedOptions((prev) => ({ ...prev, [questionId]: optionIdx }));
+    }
   };
 
   return (
@@ -36,20 +39,25 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({ questions, language }) 
           <p className="font-semibold text-lg mb-2">{q.question}</p>
           <ul className="space-y-2">
             {q.options.map((option, idx) => {
-              const label = String.fromCharCode(65 + idx); // A, B, C, D...
-              const selectedIdx = selectedOptions[q.id];
+              const label = String.fromCharCode(65 + idx);
               let bgClass = "bg-gray-50";
-              if (selectedIdx !== undefined && selectedIdx !== null) {
-                if (option === q.correctAnswer) {
-                  bgClass = "bg-green-200 text-green-800";
-                } else if (selectedIdx === idx && option !== q.correctAnswer) {
-                  bgClass = "bg-red-200 text-red-800";
+              if (revealAnswers) {
+                bgClass = option === q.correctAnswer ? "bg-green-200 text-green-800" : "bg-gray-50";
+              } else {
+                const selectedIdx = selectedOptions[q.id];
+                if (selectedIdx !== undefined && selectedIdx !== null) {
+                  if (option === q.correctAnswer) {
+                    bgClass = "bg-green-200 text-green-800";
+                  } else if (selectedIdx === idx && option !== q.correctAnswer) {
+                    bgClass = "bg-red-200 text-red-800";
+                  }
                 }
               }
               return (
                 <li key={idx}>
                   <button
                     type="button"
+                    disabled={revealAnswers}
                     onClick={() => handleOptionClick(q.id, idx)}
                     className={`w-full text-left p-3 rounded transition-colors duration-200 ${bgClass}`}
                   >

@@ -1,16 +1,16 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "../../../firebase";
 import Link from "next/link";
-import { Button } from "./Button"; 
+import { auth } from "../../../firebase";
+import { Button } from "./Button";
 
 interface LoginComponentProps {
   children: React.ReactNode;
+  onLoginClick?: () => void;
 }
 
-export default function LoginComponent({ children }: LoginComponentProps) {
+export default function LoginComponent({ children, onLoginClick }: LoginComponentProps) {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -40,12 +40,22 @@ export default function LoginComponent({ children }: LoginComponentProps) {
       <p className="text-gray-600 mb-4">
         You need to be logged in to view this content.
       </p>
-      <Button
-        variant="default"
-        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition"
-      >
-        <Link href="/login">Login</Link>
-      </Button>
+      {onLoginClick ? (
+        <Button
+          variant="default"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition"
+          onClick={onLoginClick}
+        >
+          Login
+        </Button>
+      ) : (
+        <Button
+          variant="default"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition"
+        >
+          <Link href="/login">Login</Link>
+        </Button>
+      )}
     </div>
   );
 }

@@ -49,6 +49,11 @@ import {DropdownMenu,
     import ProgressBar from "./ProgressBar"
     import TranscriptShowcase from "./TranscriptShowcase"
     import Option from "./Option"
+    import TranscriptionView from './TranscriptionView';
+    import ViewSummary from "./ViewSummary"
+    import ConfirmAction from './ConfirmAction';
+    import ArrowBack from "./ArrowBack"
+    import FeedbackDisplay from "./FeedbackDisplay"
 
 export { Button, DropdownMenu,
     DropdownMenuTrigger,
@@ -91,4 +96,4 @@ export { Button, DropdownMenu,
     useSidebar,
     Spinner,
     Card, WrittenResponse, MultipleChoice, GeneratingOverlay, Modal, LoginComponent, LoginModal, ProgressBar,
-    TranscriptShowcase, Option }
+    TranscriptShowcase, Option, TranscriptionView, ViewSummary, ConfirmAction, ArrowBack, FeedbackDisplay }

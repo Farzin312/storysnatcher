@@ -175,11 +175,11 @@ const MobileNavbar = () => {
                 <ul className="mt-2 space-y-2 pl-4 border-l border-gray-200">
                   <li>
                     <Link
-                      href="/dashboard/quickgenerate"
+                      href="/dashboard/generate"
                       onClick={() => setIsSidebarOpen(false)}
                       className="block text-gray-600 hover:text-blue-500 font-bold transition-colors"
                     >
-                      Quick Generate
+                      Generate
                     </Link>
                   </li>
                   <li>

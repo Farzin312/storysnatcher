@@ -1,12 +1,16 @@
-import { supabase } from "../client"; 
+import { supabase } from "../client";
 import { QuizGenerationResult } from "./quiz";
 
-interface QuizSetRecord {
+export interface QuizSetRecord {
   id: string;
   firebase_uid: string;
   quiz_set_name: string;
   quizzes: QuizGenerationResult;
+  score?: number | null;
+  feedback?: string | null;
   created_at: string;
+  exam_duration?: number | null;
+  exam_time_taken?: number | null;
 }
 
 interface SaveQuizSetParams {
@@ -15,7 +19,11 @@ interface SaveQuizSetParams {
   quizzes: QuizGenerationResult;
 }
 
-export async function saveQuizSet({ userId, name, quizzes }: SaveQuizSetParams): Promise<QuizSetRecord[]> {
+export async function saveQuizSet({
+  userId,
+  name,
+  quizzes,
+}: SaveQuizSetParams): Promise<QuizSetRecord[]> {
   const { data, error } = await supabase
     .from("quiz_sets")
     .insert([
@@ -43,6 +51,7 @@ export async function getUserQuizSets(userId: string): Promise<QuizSetRecord[]> 
     .select("*")
     .eq("firebase_uid", userId)
     .order("created_at", { ascending: false });
+
   if (error) {
     console.error("Error fetching quiz sets:", error);
     throw error;

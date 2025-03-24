@@ -163,10 +163,10 @@ const Navbar = () => {
               onMouseLeave={handleDashboardMouseLeave}
             >
               <Link
-                href="/dashboard/quickgenerate"
+                href="/dashboard/generate"
                 className="block px-4 py-2 hover:bg-blue-200 font-bold rounded-md transition duration-300"
               >
-                Quick Generate
+                Generate
               </Link>
               <Link
                 href="/dashboard/transcriptions"

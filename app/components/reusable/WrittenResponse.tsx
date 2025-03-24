@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export interface QuizSAQuestion {
   id: string;
@@ -10,6 +10,7 @@ export interface QuizSAQuestion {
 interface WrittenResponseProps {
   questions: QuizSAQuestion[];
   language: string;
+  revealAnswers?: boolean;
 }
 
 const translations: Record<string, { show: string; hide: string; noQuestions: string }> = {
@@ -19,12 +20,25 @@ const translations: Record<string, { show: string; hide: string; noQuestions: st
   de: { show: "Antwort anzeigen", hide: "Antwort verbergen", noQuestions: "Keine Fragen mit schriftlicher Antwort generiert." },
 };
 
-const WrittenResponse: React.FC<WrittenResponseProps> = ({ questions, language }) => {
+const WrittenResponse: React.FC<WrittenResponseProps> = ({ questions, language, revealAnswers = false }) => {
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const t = translations[language] || translations["en"];
 
+  // If revealAnswers is true, automatically reveal all answers.
+  useEffect(() => {
+    if (revealAnswers) {
+      const allRevealed: Record<string, boolean> = {};
+      questions.forEach((q) => {
+        allRevealed[q.id] = true;
+      });
+      setRevealed(allRevealed);
+    }
+  }, [revealAnswers, questions]);
+
   const toggleReveal = (id: string) => {
-    setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (!revealAnswers) {
+      setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
+    }
   };
 
   return (
@@ -36,13 +50,15 @@ const WrittenResponse: React.FC<WrittenResponseProps> = ({ questions, language }
             <p className="font-bold text-lg mb-3">{q.question}</p>
             {q.answer && (
               <div>
-                <span
-                  className="underline cursor-pointer text-blue-600"
-                  onClick={() => toggleReveal(q.id)}
-                >
-                  {revealed[q.id] ? t.hide : t.show}
-                </span>
-                {revealed[q.id] && (
+                {!revealAnswers && (
+                  <span
+                    className="underline cursor-pointer text-blue-600"
+                    onClick={() => toggleReveal(q.id)}
+                  >
+                    {revealed[q.id] ? t.hide : t.show}
+                  </span>
+                )}
+                {(revealAnswers || revealed[q.id]) && (
                   <div
                     className="mt-2 p-3 border rounded bg-gray-100 overflow-y-auto"
                     style={{ maxHeight: "150px" }}
