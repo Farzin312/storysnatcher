@@ -1,4 +1,4 @@
-// File: /app/api/generate/route.ts
+// Currently not using the audio transcription due to storage issues
 import { NextResponse } from "next/server";
 import { YoutubeTranscript } from "youtube-transcript";
 import { OpenAI } from "openai";

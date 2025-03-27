@@ -52,6 +52,7 @@ export async function updateGeneration(
     .update(record)
     .eq("id", id)
     .eq("user_id", userId)
+    .select()  // Add this to return the updated row
     .single();
   if (error) {
     throw error;

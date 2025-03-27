@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect, FormEvent } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/firebase";
 import { LoginModal, Modal, Button, ProgressBar, Spinner, Option } from "../reusable/";
 import whisperLanguagesData from "@/app/data/whisperLanguages.json";
+import { useAuthAndTier } from "@/app/hooks/useAuthAndTier";
 
 // Define transcript interface for saved transcripts
 interface Transcript {
@@ -54,9 +53,13 @@ export default function Summary() {
   // New state for the select field in Option
   const [selectedOptionForSave, setSelectedOptionForSave] = useState<string>("saved");
 
-  // User auth and error modal
-  const [user, setUser] = useState<User | null>(null);
+  // Use the revised hook for authentication and usage tracking.
+  const { user, tier, checkUsageLimit, updateUsage } = useAuthAndTier();
+
+  // Local state to control when to show the LoginModal.
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+
+  // Modal state for displaying messages (errors or notifications)
   const [modalMessage, setModalMessage] = useState<string>("");
 
   // Progress modal state and progress percentage
@@ -75,16 +78,14 @@ export default function Summary() {
     localStorage.setItem("selectedLanguage", selectedLanguage);
   }, [selectedLanguage]);
 
-  // Listen for auth changes and, if using saved transcripts, fetch them.
+  // When activeMethod or user changes, fetch saved transcripts if needed.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser && activeMethod === "saved") {
-        fetchSavedTranscripts(currentUser.uid);
-      }
-    });
-    return () => unsubscribe();
-  }, [activeMethod]);
+    if (user && activeMethod === "saved") {
+      fetchSavedTranscripts(user.uid);
+    }
+  }, [user, activeMethod]);
+
+  // (Removed the effect that defaulted summaryName based on the transcript.)
 
   // Fetch saved transcripts from the API endpoint
   async function fetchSavedTranscripts(userId: string): Promise<void> {
@@ -137,9 +138,21 @@ export default function Summary() {
   async function handleSummarize(e: FormEvent) {
     e.preventDefault();
     if (!user) {
-      setShowLoginModal(true);
+      setModalMessage("Please log in to generate a summary.");
       return;
     }
+
+    // Check usage limit for summary generation.
+    const usageCheck = checkUsageLimit("summary_generations", 1);
+    if (!usageCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your monthly summary generation limit. Consider upgrading your membership."
+          : "You have reached your monthly summary generation limit. Diamond membership cannot be upgraded."
+      );
+      return;
+    }
+
     setSummaryLoading(true);
     const payload: {
       language: string;
@@ -148,6 +161,7 @@ export default function Summary() {
       summaryType: SummaryType;
       customPrompt?: string;
     } = { language: selectedLanguage, summaryType };
+
     if (activeMethod === "saved") {
       if (!selectedTranscriptId) {
         setModalMessage("Please select a saved transcript.");
@@ -182,6 +196,8 @@ export default function Summary() {
         } else if (activeMethod === "youtube") {
           setYoutubeSummary(data.summary || "");
         }
+        // Update usage after successful summary generation.
+        await updateUsage("summary_generations", 1);
       }
     } catch (error) {
       console.error("Summary error:", error);
@@ -200,7 +216,7 @@ export default function Summary() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           userId: user!.uid,
@@ -214,7 +230,11 @@ export default function Summary() {
         setModalMessage("Error saving summary: " + data.error);
       } else {
         setModalMessage("Summary saved successfully!");
-        setSummaryName("");
+        if (activeMethod === "youtube") {
+          setSummaryName("");
+        }
+        // Update usage for saving summary.
+        await updateUsage("saved_summaries", 1);
       }
     } catch (error) {
       console.error("Error saving summary:", error);
@@ -227,11 +247,22 @@ export default function Summary() {
   // Handler for saving the summary.
   async function handleSaveSummary() {
     if (!user) {
-      setShowLoginModal(true);
+      setModalMessage("Please log in to save a summary.");
       return;
     }
+    // Require a custom summary name for both methods.
     if (!summaryName.trim()) {
       setModalMessage("Please provide a name for your summary.");
+      return;
+    }
+    // Check usage limit for saving summary.
+    const savedCheck = checkUsageLimit("saved_summaries", 1);
+    if (!savedCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your saved summaries limit. Consider upgrading your membership."
+          : "You have reached your saved summaries limit. Diamond membership cannot be upgraded."
+      );
       return;
     }
     // If both summaries exist and differ, prompt the user.
@@ -306,26 +337,40 @@ export default function Summary() {
 
         {/* Conditional UI based on method */}
         {activeMethod === "saved" ? (
-          <div className="flex flex-col items-center">
-            <label
-              htmlFor="transcript-select"
-              className="font-medium text-center text-gray-700 mb-2"
-            >
-              Select a Saved Transcript:
-            </label>
-            <select
-              id="transcript-select"
-              value={selectedTranscriptId}
-              onChange={(e) => setSelectedTranscriptId(e.target.value)}
-              className="border p-2 rounded w-full max-w-md"
-            >
-              {savedTranscripts.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.transcript_name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <>
+            {user ? (
+              <div className="flex flex-col items-center">
+                <label
+                  htmlFor="transcript-select"
+                  className="font-medium text-center text-gray-700 mb-2"
+                >
+                  Select a Saved Transcript:
+                </label>
+                <select
+                  id="transcript-select"
+                  value={selectedTranscriptId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedTranscriptId(id);
+                  }}
+                  className="border p-2 rounded w-full max-w-md"
+                >
+                  {savedTranscripts.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.transcript_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <p className="text-gray-700 font-medium mb-2">
+                  Log in to view saved transcripts.
+                </p>
+                <Button onClick={() => setShowLoginModal(true)}>Log In</Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center space-y-4">
             <label htmlFor="youtube-url" className="font-medium text-gray-700">
@@ -399,7 +444,6 @@ export default function Summary() {
         )}
       </div>
 
-      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
       {modalMessage && (
         <Modal message={modalMessage} onClose={() => setModalMessage("")} />
       )}
@@ -429,6 +473,9 @@ export default function Summary() {
           onClose={() => setShowOption(false)}
         />
       )}
+
+      {/* Render the LoginModal only when triggered */}
+      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
     </div>
   );
 }

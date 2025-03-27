@@ -1,4 +1,4 @@
-// utils/transcription/transcribe.ts
+// not in use at this moment due to storage issues
 import { google } from "googleapis";
 import FormData from "form-data";
 import fetch from "node-fetch";
@@ -52,7 +52,7 @@ async function deleteFromDrive(fileId: string) {
   await drive.files.delete({ fileId });
 }
 
-export async function streamDriveAudioToWhisper(fileId: string, language: string): Promise<string> {
+async function streamDriveAudioToWhisper(fileId: string, language: string): Promise<string> {
   const driveResponse = await drive.files.get(
     { fileId, alt: "media" },
     { responseType: "stream" }
@@ -112,20 +112,65 @@ async function convertDriveVideoToWhisper(fileId: string, language: string): Pro
   return data.text;
 }
 
+const CHUNK_SIZE = 25 * 1024 * 1024; // 25 MB
+
 export async function transcribeAudio(file: File, language: string): Promise<string> {
-  const fileId = await uploadToDrive(file);
-  try {
-    return await streamDriveAudioToWhisper(fileId, language);
-  } finally {
-    await deleteFromDrive(fileId);
+  if (file.size <= CHUNK_SIZE) {
+    const fileId = await uploadToDrive(file);
+    try {
+      return await streamDriveAudioToWhisper(fileId, language);
+    } finally {
+      await deleteFromDrive(fileId);
+    }
+  } else {
+    // Split file into chunks and transcribe each
+    let transcripts = "";
+    let start = 0;
+    let index = 0;
+    while (start < file.size) {
+      const chunk = file.slice(start, start + CHUNK_SIZE, file.type);
+      // Name the chunk uniquely
+      const chunkFile = new File([chunk], `${file.name}-part${index}`, { type: file.type });
+      const fileId = await uploadToDrive(chunkFile);
+      try {
+        const chunkTranscript = await streamDriveAudioToWhisper(fileId, language);
+        transcripts += chunkTranscript + " ";
+      } finally {
+        await deleteFromDrive(fileId);
+      }
+      start += CHUNK_SIZE;
+      index++;
+    }
+    return transcripts.trim();
   }
 }
 
 export async function transcribeVideo(file: File, language: string): Promise<string> {
-  const fileId = await uploadToDrive(file);
-  try {
-    return await convertDriveVideoToWhisper(fileId, language);
-  } finally {
-    await deleteFromDrive(fileId);
+  if (file.size <= CHUNK_SIZE) {
+    const fileId = await uploadToDrive(file);
+    try {
+      return await convertDriveVideoToWhisper(fileId, language);
+    } finally {
+      await deleteFromDrive(fileId);
+    }
+  } else {
+    // Split video into chunks and transcribe each
+    let transcripts = "";
+    let start = 0;
+    let index = 0;
+    while (start < file.size) {
+      const chunk = file.slice(start, start + CHUNK_SIZE, file.type);
+      const chunkFile = new File([chunk], `${file.name}-part${index}`, { type: file.type });
+      const fileId = await uploadToDrive(chunkFile);
+      try {
+        const chunkTranscript = await convertDriveVideoToWhisper(fileId, language);
+        transcripts += chunkTranscript + " ";
+      } finally {
+        await deleteFromDrive(fileId);
+      }
+      start += CHUNK_SIZE;
+      index++;
+    }
+    return transcripts.trim();
   }
 }

@@ -1,4 +1,3 @@
-// app/api/generate/saved/route.ts
 import { NextResponse } from "next/server";
 import { getGenerations, updateGeneration, deleteGeneration, GenerationRecord } from "@/app/utils/generate/db";
 

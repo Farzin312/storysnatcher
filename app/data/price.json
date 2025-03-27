@@ -1,15 +1,15 @@
 [
   {
     "id": 1,
-    "name": "Basic",
+    "name": "Free",
     "price": "$0/mo",
     "description": "Start learning with AI-powered transcription, summaries, and study tools for free.",
     "perks": [
-      "⏳ 25 minutes of transcription per month",
-      "⏳ 20 YouTube transcript downloads",
-      "⏳ Generate up to 100 flashcards",
-      "⏳ Save up to 5 batches",
-      "⏳ 3 personalized quizzes with feedback"
+      "25 minutes of saved audio/video transcription per month",
+      "35 YouTube transcriptions and downloads per month",
+      "Generate up to 300 flashcards",
+      "Save up to 5 flashcard batches",
+      "Generate up to 5 quizzes, and save up to 3 with feedback"
     ]
   },
   {
@@ -18,11 +18,11 @@
     "price": "$4.99/mo",
     "description": "Boost your learning with more transcription time, flashcards, and quizzes.",
     "perks": [
-      "💡 150 minutes of transcription per month",
-      "💡 75 YouTube transcript downloads",
-      "💡 Generate up to 1,000 flashcards",
-      "💡 Save up to 25 batches",
-      "💡 10 personalized quizzes with feedback"
+      "150 minutes of saved audio/video transcription per month",
+      "150 YouTube transcriptions and downloads per month",
+      "Generate up to 1200 flashcards",
+      "Save up to 25 flashcard batches",
+      "Generate up to 25 quizzes, and save up to 10 with feedback"
     ]
   },
   {
@@ -31,11 +31,11 @@
     "price": "$9.99/mo",
     "description": "Unlock the highest limits and advanced AI learning tools.",
     "perks": [
-      "🔥 400 minutes of transcription per month",
-      "🔥 250 YouTube transcript downloads",
-      "🔥 Generate up to 5,000 flashcards",
-      "🔥 Save up to 50 batches",
-      "🔥 25 personalized quizzes with difficulty adjustments"
+      "400 minutes of saved audio/video transcription per month",
+      "Unlimited YouTube transcriptions and downloads",
+      "Unlimited flashcard generation and saves",
+      "Save up to 50 flashcard batches",
+      "Generate up to 60 quizzes, and save up to 25 with feedback"
     ]
   }
 ]

@@ -1,3 +1,5 @@
+//not in use at this moment due to storage issues
+
 import { NextResponse } from "next/server";
 import { transcribeAudio, transcribeVideo } from "@/app/utils/transcription/transcribe";
 import { translateTranscript } from "@/app/utils/transcription/youtube"; // <-- import translation function

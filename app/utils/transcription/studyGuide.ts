@@ -23,7 +23,8 @@ function splitIntoChunks(text: string, chunkSize: number): string[] {
 
 /**
  * Summarizes a single chunk in the target language while preserving key details.
- * The prompt instructs the model to return plain text without markdown formatting.
+ * The prompt instructs the model to return plain text.
+ * You may optionally remove "plain text" if you want chunk summaries to be markdown formatted.
  * @param chunk A piece of the transcript.
  * @param language The target language.
  * @returns A summary for the chunk.
@@ -32,7 +33,7 @@ async function summarizeChunk(chunk: string, language: string): Promise<string> 
   try {
     if (!chunk.trim()) return "";
     const prompt = `Summarize the following text in ${language} while preserving its key details and insights. 
-Return your answer as plain text with no markdown formatting:\n\n${chunk}`;
+Return your answer as plain text:\n\n${chunk}`;
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -50,7 +51,7 @@ Return your answer as plain text with no markdown formatting:\n\n${chunk}`;
 
 /**
  * Generates a detailed and comprehensive study guide by processing the transcript in chunks.
- * The final study guide is produced in the target language as plain text without markdown formatting.
+ * The final study guide is produced in the target language as Markdown formatted text with headings and bold text.
  * @param transcript The full transcript text.
  * @param language The target language for the study guide.
  * @returns A detailed study guide.
@@ -69,9 +70,9 @@ export async function generateStudyGuide(transcript: string, language: string): 
     );
     const combinedSummaries = chunkSummaries.join("\n\n");
 
-    // Final prompt instructs GPT-4o-mini to generate a detailed study guide in the target language.
-    const finalPrompt = `Using the following chunk summaries as context, generate a detailed and comprehensive study guide in ${language} that highlights the key points, provides in-depth explanations, and offers insightful analysis for future quizzes and revision. 
-Return your answer as plain text with no markdown formatting:\n\n${combinedSummaries}`;
+    // Final prompt instructs GPT-4o-mini to generate a detailed study guide in Markdown.
+    const finalPrompt = `Using the following chunk summaries as context, generate a detailed and comprehensive study guide in ${language} that highlights the key points, provides in-depth explanations, and offers insightful analysis for future quizzes and revision.
+Return your answer as Markdown formatted text, using headings (e.g., "# Title") and bold text (e.g., "**Bold Title**") where appropriate.\n\n${combinedSummaries}`;
 
     const finalCompletion = await openai.chat.completions.create({
       model: "gpt-4o-mini",

@@ -1,11 +1,11 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/firebase";
 import { LoginModal, Modal, Button, ProgressBar, Spinner } from "../reusable/";
 import MultipleChoice, { QuizMCQuestion } from "../reusable/MultipleChoice";
 import WrittenResponse, { QuizSAQuestion } from "../reusable/WrittenResponse";
 import whisperLanguagesData from "@/app/data/whisperLanguages.json";
+import { useAuthAndTier } from "@/app/hooks/useAuthAndTier";
 
 interface Transcript {
   id: string;
@@ -42,40 +42,38 @@ export default function Quizzes() {
   const [mcQuestions, setMcQuestions] = useState<QuizMCQuestion[]>([]);
   const [saQuestions, setSaQuestions] = useState<QuizSAQuestion[]>([]);
   const [quizzesLoading, setQuizzesLoading] = useState<boolean>(false);
-  const defaultInstructions = "Generate quiz questions based on key points from the transcript.";
+  const defaultInstructions =
+    "Generate quiz questions based on key points from the transcript.";
 
   // New state for naming & saving quiz set
   const [quizSetName, setQuizSetName] = useState<string>("");
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
-  // User auth and error modal
-  const [user, setUser] = useState<User | null>(null);
+  // Use our custom hook for authentication and usage tracking
+  const { user, tier, checkUsageLimit, updateUsage } = useAuthAndTier();
+
+  // Local state to control LoginModal, modal messages, and progress
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>("");
-
-  // Progress modal state and progress percentage
   const [showProgressModal, setShowProgressModal] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
 
-  // Persist language selection between remounts
+  // Persist language selection
   useEffect(() => {
     const storedLang = localStorage.getItem("selectedLanguage");
     if (storedLang) setSelectedLanguage(storedLang);
   }, []);
+
   useEffect(() => {
     localStorage.setItem("selectedLanguage", selectedLanguage);
   }, [selectedLanguage]);
 
-  // Listen for auth changes and, if using saved transcripts, fetch them.
+  // When activeMethod or user changes, fetch saved transcripts if needed
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser && activeMethod === "saved") {
-        fetchSavedTranscripts(currentUser.uid);
-      }
-    });
-    return () => unsubscribe();
-  }, [activeMethod]);
+    if (user && activeMethod === "saved") {
+      fetchSavedTranscripts(user.uid);
+    }
+  }, [user, activeMethod]);
 
   async function fetchSavedTranscripts(userId: string): Promise<void> {
     setTranscriptsLoading(true);
@@ -95,10 +93,11 @@ export default function Quizzes() {
     }
   }
 
-  // Simulate progress updates for quiz generation and saving.
+  // Simulate progress updates for quiz generation and saving
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     let timeout: NodeJS.Timeout | null = null;
+
     if (quizzesLoading || saveLoading) {
       setShowProgressModal(true);
       setProgress(0);
@@ -117,18 +116,30 @@ export default function Quizzes() {
         setProgress(0);
       }
     }
+
     return () => {
       if (interval) clearInterval(interval);
       if (timeout) clearTimeout(timeout);
     };
   }, [quizzesLoading, saveLoading, modalMessage]);
 
-  // Generate quizzes by calling our API route.
+  // Generate quizzes by calling our API route
   async function handleGenerateQuizzes() {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
+    // Check usage limit for quiz generation
+    const usageCheck = checkUsageLimit("quiz_generations", 1);
+    if (!usageCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your quiz generation limit. Consider upgrading your membership."
+          : "You have reached your quiz generation limit. Diamond membership cannot be upgraded."
+      );
+      return;
+    }
+
     let transcriptText = "";
     if (activeMethod === "saved") {
       if (!currentTranscript) {
@@ -159,6 +170,7 @@ export default function Quizzes() {
         return;
       }
     }
+
     setQuizzesLoading(true);
     try {
       const res = await fetch("/api/quizzes", {
@@ -186,6 +198,8 @@ export default function Quizzes() {
           setMcQuestions(data.multipleChoice);
           setSaQuestions(data.writtenResponse);
         }
+        // Update usage after successful quiz generation
+        await updateUsage("quiz_generations", 1);
       }
     } catch (error) {
       console.error("Quiz generation error:", error);
@@ -195,7 +209,7 @@ export default function Quizzes() {
     }
   }
 
-  // Save quiz set by calling our API route.
+  // Save quiz set by calling our API route
   async function handleSaveQuizzes() {
     if (!user) {
       setShowLoginModal(true);
@@ -205,6 +219,17 @@ export default function Quizzes() {
       setModalMessage("Please provide a name for your quiz set.");
       return;
     }
+    // Check usage limit for saving quizzes
+    const usageCheck = checkUsageLimit("quiz_saves", 1);
+    if (!usageCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your saved quizzes limit. Consider upgrading your membership."
+          : "You have reached your saved quizzes limit. Diamond membership cannot be upgraded."
+      );
+      return;
+    }
+
     setSaveLoading(true);
     try {
       const res = await fetch("/api/quizzes/save", {
@@ -213,7 +238,10 @@ export default function Quizzes() {
         body: JSON.stringify({
           userId: user.uid,
           name: quizSetName.trim(),
-          quizzes: { multipleChoice: mcQuestions, writtenResponse: saQuestions },
+          quizzes: {
+            multipleChoice: mcQuestions,
+            writtenResponse: saQuestions,
+          },
         }),
       });
       const data = await res.json();
@@ -222,6 +250,8 @@ export default function Quizzes() {
       } else {
         setModalMessage("Quizzes saved successfully!");
         setQuizSetName("");
+        // Update usage after saving
+        await updateUsage("quiz_saves", 1);
       }
     } catch (error) {
       console.error("Save quizzes error:", error);
@@ -231,6 +261,7 @@ export default function Quizzes() {
     }
   }
 
+  // If activeMethod is "saved" and transcripts are still loading, show a full-page spinner
   if (activeMethod === "saved" && transcriptsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -298,31 +329,43 @@ export default function Quizzes() {
 
         {/* Transcript input based on method */}
         {activeMethod === "saved" ? (
-          <div className="flex flex-col items-center">
-            <label
-              htmlFor="transcript-select"
-              className="font-medium text-center text-gray-700 mb-2"
-            >
-              Select a Saved Transcript:
-            </label>
-            <select
-              id="transcript-select"
-              value={selectedTranscriptId}
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedTranscriptId(id);
-                const transcript = savedTranscripts.find((t) => t.id === id)?.transcript || "";
-                setCurrentTranscript(transcript);
-              }}
-              className="border p-2 rounded w-full max-w-md"
-            >
-              {savedTranscripts.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.transcript_name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <>
+            {user ? (
+              <div className="flex flex-col items-center">
+                <label
+                  htmlFor="transcript-select"
+                  className="font-medium text-center text-gray-700 mb-2"
+                >
+                  Select a Saved Transcript:
+                </label>
+                <select
+                  id="transcript-select"
+                  value={selectedTranscriptId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedTranscriptId(id);
+                    const transcript =
+                      savedTranscripts.find((t) => t.id === id)?.transcript || "";
+                    setCurrentTranscript(transcript);
+                  }}
+                  className="border p-2 rounded w-full max-w-md"
+                >
+                  {savedTranscripts.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.transcript_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <p className="text-gray-700 font-medium mb-2">
+                  Log in to view saved transcripts.
+                </p>
+                <Button onClick={() => setShowLoginModal(true)}>Log In</Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center space-y-4">
             <label htmlFor="youtube-url" className="font-medium text-gray-700">
@@ -353,7 +396,10 @@ export default function Quizzes() {
 
         {/* Display Multiple Choice Quizzes */}
         {mcQuestions.length > 0 && (
-          <div className="mt-8 overflow-x-auto" style={{ maxWidth: "100%", height: "400px" }}>
+          <div
+            className="mt-8 overflow-x-auto"
+            style={{ maxWidth: "100%", height: "400px" }}
+          >
             <h2 className="text-2xl font-bold mb-4">Multiple Choice Questions</h2>
             <MultipleChoice questions={mcQuestions} language={selectedLanguage} />
           </div>
@@ -361,7 +407,7 @@ export default function Quizzes() {
 
         {/* Display Written Response Quizzes */}
         {saQuestions.length > 0 && (
-          <div className="mt-8 overflow-x-auto" style={{ maxWidth: "100%"}}>
+          <div className="mt-8 overflow-x-auto" style={{ maxWidth: "100%" }}>
             <h2 className="text-2xl font-bold mb-4">Written Response Questions</h2>
             <WrittenResponse questions={saQuestions} language={selectedLanguage} />
           </div>

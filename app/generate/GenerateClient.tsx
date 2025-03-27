@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, ChangeEvent } from "react";
+import React, { useState, Suspense } from "react";
 import {
   Spinner,
   GeneratingOverlay,
@@ -8,12 +8,11 @@ import {
   MultipleChoice,
   WrittenResponse,
   Modal,
+  LoginModal
 } from "../components/reusable";
 import whisperLanguagesData from "../data/whisperLanguages.json";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/firebase";
-import LoginModal from "../components/reusable/LoginModal";
- 
+import { useAuthAndTier } from "@/app/hooks/useAuthAndTier";
+
 // Data structure interfaces
 export interface Flashcard {
   id: string;
@@ -22,23 +21,22 @@ export interface Flashcard {
   isFlipped: boolean;
   isLocked: boolean;
 }
- 
+
 export interface QuizMCQuestion {
   id: string;
   question: string;
   options: string[];
   correctAnswer: string;
 }
- 
+
 export interface QuizSAQuestion {
   id: string;
   question: string;
   answer: string;
 }
- 
+
 export interface GeneratePayload {
-  existingTranscript?: string;
-  transcriptionMethod?: "youtube" | "file";
+  transcriptionMethod?: "youtube";
   youtubeUrl?: string;
   language: string;
   flashcardPrompt: string;
@@ -50,9 +48,8 @@ export interface GeneratePayload {
   summaryType: "concise" | "detailed" | "bullet" | "custom";
   customSummaryPrompt: string;
   autoDownload: boolean;
-  mediaType?: string;
 }
- 
+
 export interface GenerateResponse {
   transcript: string;
   summary?: string;
@@ -61,14 +58,14 @@ export interface GenerateResponse {
   quizSA?: QuizSAQuestion[];
   error?: string;
 }
- 
+
 const GenerateClient: React.FC = () => {
   // Form state
   const [language, setLanguage] = useState<string>("en");
-  const [transcriptionMethod, setTranscriptionMethod] = useState<"youtube" | "file">("youtube");
-  const [file, setFile] = useState<File | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState<string>("");
-  const [flashcardPrompt, setFlashcardPrompt] = useState<string>("Focus on key points and definitions...");
+  const [flashcardPrompt, setFlashcardPrompt] = useState<string>(
+    "Focus on key points and definitions..."
+  );
   const [flashcardQuantity, setFlashcardQuantity] = useState<number>(10);
   const [quizPrompt, setQuizPrompt] = useState<string>("Generate quiz questions...");
   const [mcCount, setMcCount] = useState<number>(5);
@@ -77,8 +74,7 @@ const GenerateClient: React.FC = () => {
   const [summaryType, setSummaryType] = useState<"concise" | "detailed" | "bullet" | "custom">("concise");
   const [customSummaryPrompt, setCustomSummaryPrompt] = useState<string>("");
   const [autoDownload, setAutoDownload] = useState<boolean>(false);
-  const [mediaType, setMediaType] = useState<"audio" | "video">("audio");
- 
+
   // Result state
   const [transcript, setTranscript] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
@@ -87,148 +83,90 @@ const GenerateClient: React.FC = () => {
   const [quizSA, setQuizSA] = useState<QuizSAQuestion[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
- 
-  // Modal state for displaying messages (errors or success)
+
+  // Modal state for displaying messages (errors or notifications)
   const [modalMessage, setModalMessage] = useState<string>("");
- 
-  // Authentication state
-  const [user, setUser] = useState<User | null>(null);
+
+  // Use the revised hook for auth and usage tracking.
+  const { user, tier, checkUsageLimit, updateUsage } = useAuthAndTier();
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
- 
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => setUser(currentUser));
-    return () => unsubscribe();
-  }, []);
- 
-  // Computed name for saving generation: for YouTube use URL, for file use file name
-  const autoName = transcriptionMethod === "youtube" ? youtubeUrl.trim() : file ? file.name : "";
- 
-  // Handle file selection
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-      setError("");
-    }
-  };
- 
-  const handleRemoveFile = () => {
-    setFile(null);
-  };
- 
+
+  // Computed name for saving generation: derive from YouTube URL.
+  const autoName = youtubeUrl.trim();
+
   // MAIN SUBMIT – Generation Logic with Validation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
- 
+
     // Validate required fields
     if (!flashcardPrompt.trim() || !quizPrompt.trim()) {
       setError("Please fill out all required text fields.");
       return;
     }
-    if (transcriptionMethod === "youtube" && youtubeUrl.trim() === "") {
+    if (youtubeUrl.trim() === "") {
       setError("Please provide a valid YouTube URL.");
       return;
     }
-    if (transcriptionMethod === "file" && !file) {
-      setError("Please upload a file.");
+    // Ensure user is logged in.
+    if (!user) {
+      setShowLoginModal(true);
       return;
     }
- 
+    // Check generation usage limit.
+    const generationCheck = checkUsageLimit("generation_usage", 1);
+    if (!generationCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your monthly generation limit. Consider upgrading your membership."
+          : "You have reached your monthly generation limit. Diamond membership cannot be upgraded."
+      );
+      return;
+    }
+
     setLoading(true);
     try {
-      if (transcriptionMethod === "file") {
-        const formData = new FormData();
-        formData.append("file", file!);
-        formData.append("language", language);
-        formData.append("mediaType", mediaType);
- 
-        const transcribeRes = await fetch("/api/generate/transcribe", {
-          method: "POST",
-          body: formData,
-        });
-        const transcribeData = await transcribeRes.json();
-        if (!transcribeRes.ok) {
-          throw new Error(transcribeData.error || "Transcription failed");
-        }
-        const fileTranscript = transcribeData.transcript;
-        const generatePayload: GeneratePayload = {
-          existingTranscript: fileTranscript,
-          language,
-          flashcardPrompt,
-          flashcardQuantity,
-          quizPrompt,
-          mcCount,
-          saCount,
-          wantsSummary,
-          summaryType,
-          customSummaryPrompt,
-          autoDownload,
-        };
- 
-        const generateRes = await fetch("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(generatePayload),
-        });
-        const generateData: GenerateResponse = await generateRes.json();
-        if (!generateRes.ok) {
-          throw new Error(generateData.error || "Generation failed");
-        }
-        setTranscript(generateData.transcript || "");
-        setSummary(generateData.summary || "");
-        setFlashcards(generateData.flashcards || []);
-        setQuizMC(generateData.quizMC || []);
-        setQuizSA(generateData.quizSA || []);
- 
-        if (autoDownload && generateData.transcript) {
-          const blob = new Blob([generateData.transcript], { type: "text/plain" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "transcript.txt";
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-      } else {
-        const generatePayload: GeneratePayload = {
-          transcriptionMethod: "youtube",
-          youtubeUrl,
-          language,
-          flashcardPrompt,
-          flashcardQuantity,
-          quizPrompt,
-          mcCount,
-          saCount,
-          wantsSummary,
-          summaryType,
-          customSummaryPrompt,
-          autoDownload,
-        };
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(generatePayload),
-        });
-        const data: GenerateResponse = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Generation failed");
-        }
-        setTranscript(data.transcript || "");
-        setSummary(data.summary || "");
-        setFlashcards(data.flashcards || []);
-        setQuizMC(data.quizMC || []);
-        setQuizSA(data.quizSA || []);
- 
-        if (autoDownload && data.transcript) {
-          const blob = new Blob([data.transcript], { type: "text/plain" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "transcript.txt";
-          a.click();
-          URL.revokeObjectURL(url);
-        }
+      const generatePayload: GeneratePayload = {
+        transcriptionMethod: "youtube",
+        youtubeUrl,
+        language,
+        flashcardPrompt,
+        flashcardQuantity,
+        quizPrompt,
+        mcCount,
+        saCount,
+        wantsSummary,
+        summaryType,
+        customSummaryPrompt,
+        autoDownload,
+      };
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(generatePayload),
+      });
+      const data: GenerateResponse = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Generation failed");
       }
+      setTranscript(data.transcript || "");
+      setSummary(data.summary || "");
+      setFlashcards(data.flashcards || []);
+      setQuizMC(data.quizMC || []);
+      setQuizSA(data.quizSA || []);
+
+      if (autoDownload && data.transcript) {
+        const blob = new Blob([data.transcript], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "transcript.txt";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // Update generation usage count.
+      await updateUsage("generation_usage", 1);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -239,17 +177,27 @@ const GenerateClient: React.FC = () => {
       setLoading(false);
     }
   };
- 
-  // Handle Save Generation – only allowed for logged-in users and only when data exists
+
+  // Handle Save Generation – only allowed for logged-in users and when data exists.
   const handleSaveGeneration = async () => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
+    // Check saved generation usage limit.
+    const savedCheck = checkUsageLimit("saved_generation", 1);
+    if (!savedCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your saved generations limit. Consider upgrading your membership."
+          : "You have reached your saved generations limit. Diamond membership cannot be upgraded."
+      );
+      return;
+    }
     try {
       const payload = {
         userId: user.uid,
-        name: autoName, // Auto-derived name from YouTube URL or file name
+        name: autoName, // Auto-derived from YouTube URL.
         transcript,
         summary,
         flashcards,
@@ -265,6 +213,7 @@ const GenerateClient: React.FC = () => {
         throw new Error("Failed to save generation.");
       }
       setModalMessage("Generation saved successfully!");
+      await updateUsage("saved_generation", 1);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setModalMessage(err.message);
@@ -273,9 +222,7 @@ const GenerateClient: React.FC = () => {
       }
     }
   };
- 
-  
- 
+
   return (
     <div className="relative">
       {loading && (
@@ -303,99 +250,21 @@ const GenerateClient: React.FC = () => {
               Note: YouTube transcripts default to English.
             </p>
           </div>
- 
-          {/* Transcription Method */}
-          <div className="mb-4">
-            <label className="block font-semibold mb-1">Transcription Method:</label>
-            <div className="flex space-x-4">
-              <label>
-                <input
-                  type="radio"
-                  name="transcriptionMethod"
-                  value="youtube"
-                  checked={transcriptionMethod === "youtube"}
-                  onChange={() => {
-                    setTranscriptionMethod("youtube");
-                    setFile(null);
-                  }}
-                />{" "}
-                YouTube URL
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="transcriptionMethod"
-                  value="file"
-                  checked={transcriptionMethod === "file"}
-                  onChange={() => {
-                    setTranscriptionMethod("file");
-                    setYoutubeUrl("");
-                  }}
-                />{" "}
-                Upload File
-              </label>
-            </div>
-          </div>
- 
+
           {/* YouTube URL */}
-          {transcriptionMethod === "youtube" && (
-            <div className="mb-4">
-              <label className="block font-semibold mb-1">YouTube URL:</label>
-              <input
-                type="text"
-                value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=..."
-                className="w-full p-2 border rounded"
-              />
-            </div>
-          )}
- 
-          {/* File Upload */}
-          {transcriptionMethod === "file" && (
-            <div className="mb-4">
-              <label className="block font-semibold mb-1">Upload File:</label>
-              {file ? (
-                <div className="flex items-center space-x-2">
-                  <span>{file.name}</span>
-                  <button type="button" onClick={handleRemoveFile} className="text-sm text-red-500">
-                    Remove File
-                  </button>
-                </div>
-              ) : (
-                <input type="file" accept="audio/*,video/*" onChange={handleFileUpload} />
-              )}
-              {/* Media Type */}
-              <div className="mt-2">
-                <label className="block font-semibold mb-1">Media Type:</label>
-                <div className="flex space-x-4">
-                  <label>
-                    <input
-                      type="radio"
-                      name="mediaType"
-                      value="audio"
-                      checked={mediaType === "audio"}
-                      onChange={() => setMediaType("audio")}
-                    />{" "}
-                    Audio
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="mediaType"
-                      value="video"
-                      checked={mediaType === "video"}
-                      onChange={() => setMediaType("video")}
-                    />{" "}
-                    Video
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
- 
+          <div className="mb-4">
+            <label className="block font-semibold mb-1">YouTube URL:</label>
+            <input
+              type="text"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://youtube.com/watch?v=..."
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
           <hr className="my-4" />
- 
+
           {/* Summary Options */}
           <div className="mb-4">
             <label className="block font-semibold mb-1">Summary:</label>
@@ -447,9 +316,9 @@ const GenerateClient: React.FC = () => {
               </div>
             )}
           </div>
- 
+
           <hr className="my-4" />
- 
+
           {/* Flashcards */}
           <div className="mb-4">
             <label className="block font-semibold mb-1">Flashcards:</label>
@@ -469,9 +338,9 @@ const GenerateClient: React.FC = () => {
               className="w-full p-2 border rounded"
             />
           </div>
- 
+
           <hr className="my-4" />
- 
+
           {/* Quiz Generator */}
           <div className="mb-4">
             <label className="block font-semibold mb-1">Quiz Generator:</label>
@@ -506,9 +375,9 @@ const GenerateClient: React.FC = () => {
               </div>
             </div>
           </div>
- 
+
           <hr className="my-4" />
- 
+
           {/* Auto-Download */}
           <div className="mb-4">
             <label className="block font-semibold mb-1">Auto-Download Transcript:</label>
@@ -535,9 +404,9 @@ const GenerateClient: React.FC = () => {
               </label>
             </div>
           </div>
- 
+
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
- 
+
           <div className="mt-6">
             <button
               type="submit"
@@ -548,7 +417,7 @@ const GenerateClient: React.FC = () => {
             </button>
           </div>
         </div>
- 
+
         {/* Right Side – Display Results */}
         <div className="w-full md:w-1/2 p-4 border-l">
           {/* Transcript */}
@@ -558,7 +427,7 @@ const GenerateClient: React.FC = () => {
               {transcript || "No Transcript Generated"}
             </div>
           </div>
- 
+
           {/* Summary */}
           <div className="mb-4">
             <h3 className="font-semibold">Summary:</h3>
@@ -568,7 +437,7 @@ const GenerateClient: React.FC = () => {
               <p className="text-sm italic text-gray-600">No summary generated.</p>
             )}
           </div>
- 
+
           {/* Flashcards */}
           <div className="mb-4">
             <h3 className="font-semibold">Flashcards:</h3>
@@ -584,7 +453,7 @@ const GenerateClient: React.FC = () => {
               <p className="text-sm italic text-gray-600">No flashcards generated.</p>
             )}
           </div>
- 
+
           {/* Quiz Questions */}
           <div className="mb-4">
             <h3 className="font-semibold">Quiz Questions:</h3>
@@ -615,7 +484,7 @@ const GenerateClient: React.FC = () => {
               <p className="text-sm italic text-gray-600">No quiz questions generated.</p>
             )}
           </div>
- 
+
           {/* Save Generation Button – only show if data exists */}
           {(transcript || summary || flashcards.length > 0 || quizMC.length > 0 || quizSA.length > 0) && (
             <div className="mt-6">
@@ -635,5 +504,5 @@ const GenerateClient: React.FC = () => {
     </div>
   );
 };
- 
+
 export default GenerateClient;

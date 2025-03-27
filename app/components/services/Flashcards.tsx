@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/firebase";
 import { LoginModal, Modal, Button, ProgressBar, Spinner } from "../reusable/";
 import Card, { CardType } from "../reusable/Cards";
 import whisperLanguagesData from "@/app/data/whisperLanguages.json";
+import { useAuthAndTier } from "@/app/hooks/useAuthAndTier";
 
 interface Transcript {
   id: string;
@@ -43,16 +42,18 @@ export default function Flashcards() {
   const [flashcardSetName, setFlashcardSetName] = useState<string>("");
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
-  // User auth and error modal
-  const [user, setUser] = useState<User | null>(null);
-  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
-  const [modalMessage, setModalMessage] = useState<string>("");
+  // Use our custom hook for auth and usage tracking.
+  const { user, tier, checkUsageLimit, updateUsage } = useAuthAndTier();
 
-  // Progress modal state and progress percentage
+  // Local state for modal and login modal.
+  const [modalMessage, setModalMessage] = useState<string>("");
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+
+  // Progress modal state and progress percentage.
   const [showProgressModal, setShowProgressModal] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
 
-  // Persist language selection between remounts
+  // Persist language selection between remounts.
   useEffect(() => {
     const storedLang = localStorage.getItem("selectedLanguage");
     if (storedLang) setSelectedLanguage(storedLang);
@@ -61,16 +62,12 @@ export default function Flashcards() {
     localStorage.setItem("selectedLanguage", selectedLanguage);
   }, [selectedLanguage]);
 
-  // Listen for auth changes and, if using saved transcripts, fetch them.
+  // When activeMethod or user changes, fetch saved transcripts if needed.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser && activeMethod === "saved") {
-        fetchSavedTranscripts(currentUser.uid);
-      }
-    });
-    return () => unsubscribe();
-  }, [activeMethod]);
+    if (user && activeMethod === "saved") {
+      fetchSavedTranscripts(user.uid);
+    }
+  }, [user, activeMethod]);
 
   async function fetchSavedTranscripts(userId: string): Promise<void> {
     setTranscriptsLoading(true);
@@ -122,6 +119,16 @@ export default function Flashcards() {
   async function handleGenerateFlashcards() {
     if (!user) {
       setShowLoginModal(true);
+      return;
+    }
+    // Check flashcard generation usage limit.
+    const usageCheck = checkUsageLimit("flashcard_generations", 1);
+    if (!usageCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your flashcard generation limit. Consider upgrading your membership."
+          : "You have reached your flashcard generation limit. Diamond membership cannot be upgraded."
+      );
       return;
     }
     let transcriptText = "";
@@ -176,15 +183,17 @@ export default function Flashcards() {
       if (data.error) {
         setModalMessage("Error generating flashcards: " + data.error);
       } else {
-        // Map the returned flashcards, ensuring each has a unique id and a boolean isLocked.
+        // Map returned flashcards, ensuring unique ids and isLocked property.
         const newCards: CardType[] = data.flashcards.map((card: CardType, index: number) => ({
           ...card,
           id: card.id || `flashcard-${Date.now()}-${index}`,
           isLocked: card.isLocked !== undefined ? card.isLocked : false,
         }));
-        // Replace only the unlocked flashcards.
+        // Preserve locked cards.
         const lockedCards = flashcards.filter((c) => c.isLocked);
         setFlashcards([...lockedCards, ...newCards]);
+        // Update usage after successful generation.
+        await updateUsage("flashcard_generations", 1);
       }
     } catch (error) {
       console.error("Flashcard generation error:", error);
@@ -194,12 +203,12 @@ export default function Flashcards() {
     }
   }
 
-  // Refresh flashcards: re-generate flashcards for the unlocked ones.
+  // Refresh flashcards: re-generate flashcards for unlocked ones.
   function handleRefreshFlashcards() {
     handleGenerateFlashcards();
   }
 
-  // Toggle lock state on a flashcard (via checkbox)
+  // Toggle lock state on a flashcard.
   function toggleLock(cardId: string) {
     setFlashcards((prevCards) =>
       prevCards.map((card) =>
@@ -216,6 +225,16 @@ export default function Flashcards() {
     }
     if (!flashcardSetName.trim()) {
       setModalMessage("Please provide a name for your flashcard set.");
+      return;
+    }
+    // Check usage limit for saving flashcards.
+    const usageCheck = checkUsageLimit("flashcard_saves", 1);
+    if (!usageCheck.allowed) {
+      setModalMessage(
+        tier !== "Diamond"
+          ? "You have reached your saved flashcards limit. Consider upgrading your membership."
+          : "You have reached your saved flashcards limit. Diamond membership cannot be upgraded."
+      );
       return;
     }
     setSaveLoading(true);
@@ -235,6 +254,8 @@ export default function Flashcards() {
       } else {
         setModalMessage("Flashcards saved successfully!");
         setFlashcardSetName("");
+        // Update usage after saving.
+        await updateUsage("flashcard_saves", 1);
       }
     } catch (error) {
       console.error("Save flashcards error:", error);
@@ -294,31 +315,40 @@ export default function Flashcards() {
 
         {/* Transcript input based on method */}
         {activeMethod === "saved" ? (
-          <div className="flex flex-col items-center">
-            <label
-              htmlFor="transcript-select"
-              className="font-medium text-center text-gray-700 mb-2"
-            >
-              Select a Saved Transcript:
-            </label>
-            <select
-              id="transcript-select"
-              value={selectedTranscriptId}
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedTranscriptId(id);
-                const transcript = savedTranscripts.find((t) => t.id === id)?.transcript || "";
-                setCurrentTranscript(transcript);
-              }}
-              className="border p-2 rounded w-full max-w-md"
-            >
-              {savedTranscripts.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.transcript_name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <>
+            {user ? (
+              <div className="flex flex-col items-center">
+                <label
+                  htmlFor="transcript-select"
+                  className="font-medium text-center text-gray-700 mb-2"
+                >
+                  Select a Saved Transcript:
+                </label>
+                <select
+                  id="transcript-select"
+                  value={selectedTranscriptId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedTranscriptId(id);
+                    const transcript = savedTranscripts.find((t) => t.id === id)?.transcript || "";
+                    setCurrentTranscript(transcript);
+                  }}
+                  className="border p-2 rounded w-full max-w-md"
+                >
+                  {savedTranscripts.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.transcript_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <p className="text-gray-700 font-medium mb-2">Log in to view saved transcripts.</p>
+                <Button onClick={() => setShowLoginModal(true)}>Log In</Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center space-y-4">
             <label htmlFor="youtube-url" className="font-medium text-gray-700">
