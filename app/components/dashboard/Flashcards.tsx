@@ -25,7 +25,7 @@ export default function Flashcard() {
     if (user) {
       fetchFlashcardSets();
     }
-  }, [user]);
+  }, [user, setFlashcardSets]);
 
   const fetchFlashcardSets = async () => {
     setLoading(true);

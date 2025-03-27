@@ -3,23 +3,25 @@ import { Metadata } from "next";
 
 interface PageProps {
   params: { name: string };
-  searchParams: { userId?: string };
+  searchParams?: { userId?: string };
 }
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  // Make sure to await the params.
+  // Await the params object (no-op, but satisfies Next’s requirement)
   const params = await Promise.resolve(props.params);
-  const titleName = params.name;
-  const title = titleName
-    ? `StorySnatcher - Flashcards - ${titleName}`
+  const { name } = params;
+
+  const title = name
+    ? `StorySnatcher - Flashcards - ${name}`
     : "Flashcard Set";
+
   return { title };
 }
 
 export default async function FlashcardSetPage(props: PageProps) {
-  // Also await the params before using it in the component.
+  // Await the params object again before using
   const params = await Promise.resolve(props.params);
-  return <SavedFlashcardsClient name={params.name} />;
+  const { name } = params;
+
+  return <SavedFlashcardsClient name={name} />;
 }
