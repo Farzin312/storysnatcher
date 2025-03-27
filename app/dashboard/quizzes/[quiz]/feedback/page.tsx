@@ -1,29 +1,35 @@
+import Link from "next/link";
+import FeedbackDisplay from "@/app/components/reusable/FeedbackDisplay";
 import { getUserQuizSets } from "@/app/utils/quizzes/db";
 import { QuizSetRecord } from "@/app/utils/quizzes/saved";
 import { Metadata } from "next";
-import Link from "next/link";
-import FeedbackDisplay from "@/app/components/reusable/FeedbackDisplay";
-
-interface PageProps {
-  params: { quiz: string };
-  searchParams?: { userId?: string };
-}
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const resolvedParams = await Promise.resolve(params);
-  const titleName = decodeURIComponent(resolvedParams.quiz);
-  const title = titleName ? `StorySnatcher - Quiz Feedback - ${titleName}` : "Quiz Feedback";
-  return { title };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ quiz: string }>;
+}): Promise<Metadata> {
+  const { quiz } = await params;
+  const titleName = decodeURIComponent(quiz);
+  return {
+    title: titleName
+      ? `StorySnatcher - Quiz Feedback - ${titleName}`
+      : "Quiz Feedback",
+  };
 }
 
-export default async function QuizFeedbackPage({ params, searchParams }: PageProps) {
-  const resolvedParams = await Promise.resolve(params);
-  const resolvedSearchParams = await Promise.resolve(searchParams);
-  const userId = resolvedSearchParams?.userId;
+export default async function QuizFeedbackPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ quiz: string }>;
+  searchParams?: Promise<{ userId?: string }>;
+}) {
+  const { quiz } = await params;
+  const { userId } = searchParams ? await searchParams : {};
 
-  // Ensure the user is logged in.
   if (!userId) {
     return (
       <div className="p-8 text-gray-800">
@@ -38,7 +44,7 @@ export default async function QuizFeedbackPage({ params, searchParams }: PagePro
   let quizSet: QuizSetRecord | null = null;
   try {
     const sets = await getUserQuizSets(userId);
-    quizSet = sets.find(set => set.quiz_set_name === resolvedParams.quiz) || null;
+    quizSet = sets.find((s) => s.quiz_set_name === quiz) ?? null;
   } catch (error) {
     console.error(error);
   }
@@ -53,7 +59,9 @@ export default async function QuizFeedbackPage({ params, searchParams }: PagePro
 
   return (
     <div className="p-8 text-gray-800">
-      <h1 className="text-4xl font-bold mb-6">Feedback for {quizSet.quiz_set_name}</h1>
+      <h1 className="text-4xl font-bold mb-6">
+        Feedback for {quizSet.quiz_set_name}
+      </h1>
       {quizSet.feedback ? (
         <div className="p-4 border rounded bg-white shadow">
           <FeedbackDisplay feedback={quizSet.feedback} />
@@ -62,10 +70,7 @@ export default async function QuizFeedbackPage({ params, searchParams }: PagePro
         <p>No feedback available for this quiz.</p>
       )}
       <div className="mt-4">
-        <Link
-          href="/dashboard/quizzes"
-          className="border rounded px-4 py-2 hover:bg-gray-200"
-        >
+        <Link href="/dashboard/quizzes" className="border rounded px-4 py-2 hover:bg-gray-200">
           Back
         </Link>
       </div>

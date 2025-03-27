@@ -1,22 +1,24 @@
 import GeneratedDataClient from "@/app/components/dashboard/GeneratedData";
 import { Metadata } from "next";
 
-interface PageProps {
-  params: { name: string };
-  searchParams: { userId?: string };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ name: string }>;
+}): Promise<Metadata> {
+  const { name } = await params;
+  return {
+    title: name
+      ? `StorySnatcher - Generated Data - ${name}`
+      : "Generated Data Detail",
+  };
 }
 
-export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  // Await the params before destructuring.
-  const params = await Promise.resolve(props.params);
-  const { name } = params;
-  const title = name ? `StorySnatcher - Generated Data - ${name}` : "Generated Data Detail";
-  return { title };
-}
-
-export default async function GeneratedDataPage(props: PageProps) {
-  // Await the params here as well.
-  const params = await Promise.resolve(props.params);
-  const { name } = params;
+export default async function GeneratedDataPage({
+  params,
+}: {
+  params: Promise<{ name: string }>;
+}) {
+  const { name } = await params;
   return <GeneratedDataClient data={name} />;
 }
