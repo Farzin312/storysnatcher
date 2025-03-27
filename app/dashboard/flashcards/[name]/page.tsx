@@ -1,14 +1,12 @@
 import SavedFlashcardsClient from "@/app/components/dashboard/SavedFlashcardsClient";
 import { Metadata } from "next";
 
-interface PageProps {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ name: string }>;
-  searchParams?: { userId?: string };
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+}): Promise<Metadata> {
   const { name } = await params;
-
   return {
     title: name
       ? `StorySnatcher - Flashcards - ${name}`
@@ -16,7 +14,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function FlashcardSetPage({ params }: PageProps) {
+export default async function FlashcardSetPage({
+  params,
+}: {
+  params: Promise<{ name: string }>;
+}) {
   const { name } = await params;
   return <SavedFlashcardsClient name={name} />;
 }
