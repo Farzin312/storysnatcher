@@ -6,6 +6,8 @@ interface PageProps {
   searchParams: { userId?: string };
 }
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   // Make sure to await the params.
   const params = await Promise.resolve(props.params);
