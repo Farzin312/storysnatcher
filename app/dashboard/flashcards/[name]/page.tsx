@@ -1,22 +1,22 @@
 import SavedFlashcardsClient from "@/app/components/dashboard/SavedFlashcardsClient";
+import { Metadata } from "next";
 
-// Define a plain type for your route props.
 interface PageProps {
-  params: { name: string };
+  params: Promise<{ name: string }>;
   searchParams?: { userId?: string };
 }
 
-// 1) generateMetadata as an async function:
-export const metadata = {
-  title: "Flashcards - Dashboard - StorySnatcher",
-  description: "View your Flashcards.",
-};
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { name } = await params;
 
-// 2) The page component itself:
-export default async function FlashcardSetPage(props: PageProps) {
-  // Await the params object again before using
-  const params = await Promise.resolve(props.params);
-  const { name } = params;
+  return {
+    title: name
+      ? `StorySnatcher - Flashcards - ${name}`
+      : "Flashcard Set",
+  };
+}
 
+export default async function FlashcardSetPage({ params }: PageProps) {
+  const { name } = await params;
   return <SavedFlashcardsClient name={name} />;
 }
