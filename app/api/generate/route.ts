@@ -1,4 +1,3 @@
-// Currently not using the audio transcription due to storage issues
 import { NextResponse } from "next/server";
 import { YoutubeTranscript } from "youtube-transcript";
 import { OpenAI } from "openai";
@@ -54,6 +53,13 @@ interface GenerationPayload {
 
 // --- YouTube Transcription Function ---
 async function transcribeYouTube(url: string): Promise<string> {
+  // Validate URL format
+  try {
+    new URL(url);
+  } catch {
+    throw new Error("Invalid YouTube URL provided.");
+  }
+
   try {
     const transcriptArray = await YoutubeTranscript.fetchTranscript(url);
     return transcriptArray.map((t) => t.text).join(" ");
@@ -158,17 +164,23 @@ async function generateQuizStep(
   multipleChoice: number,
   shortAnswer: number
 ): Promise<QuizResult> {
-  const finalPrompt = `Generate a quiz based on the following transcript. Respond only in ${language} and do not include any markdown formatting.
+  const finalPrompt = `Based on the following transcript, generate a quiz. The quiz should include ${multipleChoice} multiple choice questions and ${shortAnswer} short answer questions.
+
+For multiple choice questions, each question must be an object with:
+- "question": a string containing the question,
+- "options": an array of exactly 4 answer options,
+- "correctAnswer": a string that matches one of the options.
+
+For short answer questions, each question must be an object with:
+- "question": a string containing the question,
+- "answer": a string containing the answer.
 
 Transcript:
 ${transcript}
 
-Requirements:
-- Provide ${multipleChoice} multiple choice questions. For each, return an object with "question", an array "options" (4 options), and "correctAnswer".
-- Provide ${shortAnswer} short answer questions. For each, return an object with "question" and "answer".
 Instructions: ${instructions}
 
-Return a JSON object with two keys: "mc" (for multiple choice) and "sa" (for short answer).`;
+Return a valid JSON object with two keys: "mc" (an array of multiple choice questions) and "sa" (an array of short answer questions). Do not include any additional text or markdown formatting.`;
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -199,9 +211,16 @@ Return a JSON object with two keys: "mc" (for multiple choice) and "sa" (for sho
           answer: q.answer,
         }))
       : [];
+      
+    // Ensure that at least one quiz question is generated
+    if (mc.length === 0 && sa.length === 0) {
+      throw new Error("Quiz generation failed: No quiz questions were generated.");
+    }
+      
     return { mc, sa };
-  } catch {
-    return { mc: [], sa: [] };
+  } catch (error) {
+    console.error("Error generating quiz:", error);
+    throw new Error("Failed to generate quiz questions.");
   }
 }
 
@@ -223,15 +242,21 @@ export async function POST(req: Request): Promise<Response> {
     // 1. Figure out how we get the transcript
     let transcript = "";
 
-    // (A) If the user provided an existing transcript (from the file route)
+    // (A) Use existing transcript if provided
     if (payload.existingTranscript) {
       transcript = payload.existingTranscript;
     }
-    // (B) Otherwise, if they are using YouTube transcription
+    // (B) Otherwise, if using YouTube transcription
     else if (payload.transcriptionMethod === "youtube" && payload.youtubeUrl) {
+      // Validate URL before processing
+      try {
+        new URL(payload.youtubeUrl);
+      } catch {
+        return NextResponse.json({ error: "Invalid YouTube URL provided." }, { status: 400 });
+      }
       transcript = await transcribeYouTube(payload.youtubeUrl);
     }
-    // (C) Otherwise, no transcript
+    // (C) Otherwise, no transcript available
     else {
       return NextResponse.json(
         { error: "No existing transcript or valid YouTube URL provided." },
@@ -258,14 +283,22 @@ export async function POST(req: Request): Promise<Response> {
       payload.flashcardQuantity
     );
 
-    // 4. Generate quiz
-    const quizResult = await generateQuizStep(
-      transcript,
-      payload.quizPrompt,
-      payload.language || "en",
-      payload.mcCount,
-      payload.saCount
-    );
+    // 4. Generate quiz questions
+    let quizResult: QuizResult;
+    try {
+      quizResult = await generateQuizStep(
+        transcript,
+        payload.quizPrompt,
+        payload.language || "en",
+        payload.mcCount,
+        payload.saCount
+      );
+    } catch (quizError) {
+      return NextResponse.json(
+        { error: quizError instanceof Error ? quizError.message : "Failed to generate quiz questions." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       transcript,
