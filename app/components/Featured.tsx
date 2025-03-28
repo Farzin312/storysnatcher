@@ -16,7 +16,7 @@ const FeaturedServices = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 mx-16 md:mx-10 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 mx-12 md:mx-10 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {featuredData.map((service) => (
           <div
             key={service.id}
