@@ -2,19 +2,19 @@
   {
     "id": 1,
     "title": "Student",
-    "paragraph": "Easily transcribe lectures and generate study guides. Use AI-powered flashcards and quizzes to reinforce key concepts and improve retention.",
+    "paragraph": "Transform YouTube lectures into clear transcripts, smart summaries, and AI-generated flashcards and quizzes — all in one place.",
     "image": "/showcase/student.jpg"
   },
   {
     "id": 2,
     "title": "Educator",
-    "paragraph": "Quickly generate summaries, flashcards, and quizzes from class discussions or pre-recorded content, making it easier to engage students and track their progress.",
-    "image": "/showcase/youtuber.jpg"
+    "paragraph": "Create engaging learning resources from your lessons — transcribe, summarize, and build custom flashcards or quizzes to support every student’s pace.",
+    "image": "/showcase/educator.jpg"
   },
   {
     "id": 3,
-    "title": "Corporate Professional",
-    "paragraph": "Summarize meetings, extract key takeaways, and test comprehension with quizzes to ensure that important business discussions are well understood.",
+    "title": "Lifelong Learner",
+    "paragraph": "Learn smarter by turning podcasts, interviews, and video content into searchable transcripts, concise summaries, and interactive study tools.",
     "image": "/showcase/corporate.jpg"
   }
 ]

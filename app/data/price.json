@@ -3,39 +3,42 @@
     "id": 1,
     "name": "Free",
     "price": "$0/mo",
-    "description": "Start learning with AI-powered transcription, summaries, and study tools for free.",
+    "description": "Start learning with AI‑powered transcription, summaries, and study tools for free.",
     "perks": [
-      "25 minutes of saved audio/video transcription per month",
-      "35 YouTube transcriptions and downloads per month",
-      "Generate up to 300 flashcards",
-      "Save up to 5 flashcard batches",
-      "Generate up to 5 quizzes, and save up to 3 with feedback"
+      "✨ Save up to 10 transcripts per month",
+      "✨ 35 YouTube transcriptions and downloads per month",
+      "✨ Unlimited flashcard generation; save up to 5 batches",
+      "✨ Generate up to 5 quizzes; save up to 3 with feedback",
+      "✨ Generate up to 100 summaries; save up to 10",
+      "✨ Access up to 5 AI quizzes per month; save up to 3 with unlimited feedback"
     ]
   },
   {
     "id": 2,
     "name": "Gold",
-    "price": "$4.99/mo",
-    "description": "Boost your learning with more transcription time, flashcards, and quizzes.",
+    "price": "$3.99/mo",
+    "description": "Boost your learning with more transcription time, flashcards, quizzes, and summaries.",
     "perks": [
-      "150 minutes of saved audio/video transcription per month",
-      "150 YouTube transcriptions and downloads per month",
-      "Generate up to 1200 flashcards",
-      "Save up to 25 flashcard batches",
-      "Generate up to 25 quizzes, and save up to 10 with feedback"
+      "✨ Save up to 50 transcripts per month",
+      "✨ 150 YouTube transcriptions and downloads per month",
+      "✨ Unlimited flashcard generation; save up to 25 batches",
+      "✨ Generate up to 25 quizzes; save up to 10 with feedback",
+      "✨ Generate up to 300 summaries; save up to 50",
+      "✨ Access up to 25 AI quizzes per month; save up to 10 with unlimited feedback"
     ]
   },
   {
     "id": 3,
     "name": "Diamond",
-    "price": "$9.99/mo",
+    "price": "$7.99/mo",
     "description": "Unlock the highest limits and advanced AI learning tools.",
     "perks": [
-      "400 minutes of saved audio/video transcription per month",
-      "Unlimited YouTube transcriptions and downloads",
-      "Unlimited flashcard generation and saves",
-      "Save up to 50 flashcard batches",
-      "Generate up to 60 quizzes, and save up to 25 with feedback"
+      "✨ Unlimited transcript saves",
+      "✨ Unlimited YouTube transcriptions and downloads",
+      "✨ Unlimited flashcard generation; save up to 50 batches",
+      "✨ Generate up to 60 quizzes; save up to 25 with feedback",
+      "✨ Unlimited summary generation and saves",
+      "✨ Unlimited AI study sessions and saves with unlimited feedback"
     ]
   }
 ]

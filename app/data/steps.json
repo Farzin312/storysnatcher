@@ -1,26 +1,26 @@
 [
   {
     "id": 1,
-    "title": "Generate Transcription",
-    "description": "Upload an audio file or enter a YouTube URL. The system will generate an accurate transcription of the spoken content.",
-    "reminder": "Transcripts are stored securely and can be used for summaries and study tools."
+    "title": "Enter YouTube URL & Transcribe",
+    "description": "Paste a YouTube video URL to generate an accurate transcript. Only YouTube links are supported — no file uploads required.",
+    "reminder": "Your transcript is saved in Dashboard → Generate for later summaries, flashcards, and quizzes."
   },
   {
     "id": 2,
-    "title": "Generate Summarize",
-    "description": "Generate concise summaries from your transcript. Choose between bullet points, key insights, or detailed explanations.",
-    "reminder": "Summaries help condense large amounts of information for quick review."
+    "title": "Generate Summary",
+    "description": "Create concise summaries (bullet points, key insights, or detailed explanations) directly from your saved transcript.",
+    "reminder": "Find all summaries under Dashboard → Generate to quickly review key concepts."
   },
   {
     "id": 3,
-    "title": "Generate Flashcard",
-    "description": "Convert key ideas from your transcript into AI-generated flashcards for active recall and spaced repetition.",
-    "reminder": "You can review flashcards anytime to reinforce learning."
+    "title": "Generate Flashcards",
+    "description": "Convert transcript content into AI‑generated flashcards for active recall and spaced repetition practice.",
+    "reminder": "Saved flashcards live in Dashboard → Generate → Flashcards for on‑the‑go studying."
   },
   {
     "id": 4,
-    "title": "Generate Quiz",
-    "description": "Test your knowledge with AI-generated quizzes based on the transcription content. Includes multiple-choice and written-response questions.",
-    "reminder": "Quizzes help you assess comprehension and retention of key information."
+    "title": "Generate Quiz & Get Feedback",
+    "description": "Create AI‑powered quizzes (multiple‑choice and written response) from your transcript. After completing a quiz, receive personalized feedback on strengths and areas for improvement — plus the option to hide or reveal correct answers during self‑study.",
+    "reminder": "View quiz results, feedback, and answer keys under Dashboard → Generate → Quizzes."
   }
 ]
