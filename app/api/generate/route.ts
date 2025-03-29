@@ -60,6 +60,8 @@ interface GenerationPayload {
 }
 
 // --- Transcript Retrieval Logic using Third‑Party API ---
+// (Helper functions are now internal and not exported)
+
 function extractVideoId(youtubeUrl: string): string {
   try {
     const url = new URL(youtubeUrl);
@@ -76,7 +78,7 @@ function extractVideoId(youtubeUrl: string): string {
   }
 }
 
-export async function fetchYoutubeTranscript(youtubeUrl: string): Promise<string> {
+async function fetchYoutubeTranscript(youtubeUrl: string): Promise<string> {
   const videoId = extractVideoId(youtubeUrl);
   if (!videoId) {
     throw new Error("Could not extract video ID from the provided YouTube URL.");
@@ -297,6 +299,7 @@ Return a valid JSON object with two keys: "mc" (an array of multiple choice ques
 }
 
 // --- Unified POST Handler ---
+// Only the POST handler is exported from this file.
 export async function POST(req: Request): Promise<Response> {
   try {
     const contentType = req.headers.get("content-type") || "";
