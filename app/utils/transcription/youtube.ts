@@ -1,4 +1,3 @@
-import { YoutubeTranscript } from "youtube-transcript";
 import { OpenAI } from "openai";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -6,17 +5,100 @@ if (!OPENAI_API_KEY) {
   throw new Error("Missing OPENAI_API_KEY environment variable.");
 }
 
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+if (!YOUTUBE_API_KEY) {
+  throw new Error("Missing YOUTUBE_API_KEY environment variable.");
+}
+
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 /**
- * Fetches the transcript from a YouTube video.
+ * Extracts the video ID from a YouTube URL.
+ * @param youtubeUrl The URL of the YouTube video.
+ * @returns The video ID as a string.
+ */
+function extractVideoId(youtubeUrl: string): string {
+  try {
+    const url = new URL(youtubeUrl);
+    if (url.hostname === "youtu.be") {
+      return url.pathname.slice(1);
+    }
+    if (url.hostname.includes("youtube.com")) {
+      const id = url.searchParams.get("v");
+      if (id) return id;
+    }
+    throw new Error("Invalid YouTube URL");
+  } catch {
+    throw new Error("Failed to parse YouTube URL.");
+  }
+}
+
+/**
+ * Fetches the transcript from a YouTube video using the third‑party API.
+ * Joins all transcript segments' text (ignoring start and duration).
  * @param youtubeUrl The URL of the YouTube video.
  * @returns The combined transcript text.
  */
 export async function fetchYoutubeTranscript(youtubeUrl: string): Promise<string> {
+  const videoId = extractVideoId(youtubeUrl);
+  if (!videoId) {
+    throw new Error("Could not extract video ID from the provided YouTube URL.");
+  }
+
   try {
-    const transcriptArray = await YoutubeTranscript.fetchTranscript(youtubeUrl);
-    return transcriptArray.map((t) => t.text).join(" ");
+    const response = await fetch("https://www.youtube-transcript.io/api/transcripts", {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${YOUTUBE_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ ids: [videoId] })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API responded with status ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (Array.isArray(data)) {
+      interface TranscriptItem {
+        id: string;
+        tracks?: Array<{
+          transcript?: Array<{ text?: string; start?: string; dur?: string }>;
+          text?: string;
+        }>;
+      }
+      const transcriptObj = (data as TranscriptItem[]).find((item) => item.id === videoId);
+      if (transcriptObj && Array.isArray(transcriptObj.tracks)) {
+       
+
+        const transcript = transcriptObj.tracks
+          .map((track) => {
+            if (Array.isArray(track.transcript)) {
+              // If the track has a transcript array, join all segment texts.
+              return track.transcript
+                .map((seg) => (typeof seg.text === "string" ? seg.text.trim() : ""))
+                .filter((t) => t.length > 0)
+                .join(" ");
+            } else if (typeof track.text === "string") {
+              return track.text.trim();
+            }
+            return "";
+          })
+          .filter((t) => t.length > 0)
+          .join(" ");
+          
+        if (transcript.trim().length === 0) {
+          console.error("No transcript text found in tracks:", transcriptObj.tracks);
+          throw new Error("Transcript tracks are empty.");
+        }
+        return transcript;
+      }
+    }
+    
+    console.error("Unexpected API response structure:", data);
+    throw new Error("Transcript not found in API response.");
   } catch (error) {
     console.error("Error fetching YouTube transcript:", error);
     throw new Error("Failed to fetch transcript from YouTube.");
